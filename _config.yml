@@ -1,25 +1,18 @@
-title:            Balzac
-tagline:          A beautiful theme.
-description:      Describe your website.
-canonical: http://localhost:4000
+title:            Avital Oliver
+tagline:          Tagline.
+description:      Topics in statistics and {machine,deep} learning
+canonical: http://avital.github.io
 
 # Owner/author information
 owner:
-  name:           Cole Townsend
+  name:           Avital Oliver
   avatar:         avatar.png
-  bio:            "Aesthete & Athlete"
-  email:          cole@coletownsend.com
-  twitter:        twnsndco
-  github:         coletownsend
-  instagram:      ctrunsthis
-  dribbble:       coletownsend
-  disqus:         balzac
-  location:       "Buffalo, NY"
+  bio:            "Mathematician and Software Engineer"
+  email:          avital@aoliver.org
+  twitter:        avitaloliver
+  github:         avital
+  location:       "San Francisco, CA"
   # Plug in your disqus shortname!
-
-tools:
-  standards:      "HTML, SCSS, Jekyll"
-  software:       "git"
 
 # Open Graph customization
 opengraph:
@@ -30,15 +23,9 @@ opengraph:
 links:
   - title: About
     url: /about
-  - title: Github
-    url: https://github.com/ColeTownsend/Balzac-for-Jekyll
-    external: true
-  - title: Cole Who?
-    url: http://coletownsend.com
-    external: true
 
 # http://en.wikipedia.org/wiki/List_of_tz_database_time_zones
-timezone:    America/New_York
+timezone:    America/Los_Angeles
 future:      true
 #highlighter: pygments
 markdown:    kramdown

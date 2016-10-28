@@ -1,60 +1,54 @@
 ---
-layout: post
-permalink: /about/index.html
+layout: page
+permalink: /about/
 title: Avital Oliver
 image:
-  feature: soft-trees.jpg
+  feature: library2.jpg
 ---
 
-### This blog
-
-I write about topics in statistics and {machine,deep} learning as I
+I write about topics in mathematics, statistics and {machine,deep} learning as I
 work on them or learn about them.
 
-Inspired by [Julia Evans](http://jvns.ca/), I plan to write about
-things even (especially) when I don't fully understand them. I'd love
-to learn more about anything I'm writing about, please help by leaving
-comments -- especially when I'm wrong.
+Inspired by [Julia Evans](http://jvns.ca/), I write about things even
+(especially) when I don't fully understand them. I'd love to learn
+more about what I write about. Please help by leaving comments --
+especially when I'm wrong.
 
 ### About me
 
-I took my first college class when I was 11 years old. When I was 20
-years old, I finished my M.Sc. in Mathematics with a [single published
-paper](http://www.sciencedirect.com/science/article/pii/S0021869304001863)
-on conjugacy classes of finite groups. Then I stopped studying
-Mathematics formally and re-focused on my other love, software
-engineering.
+I fell in love with Mathematics at an extremely young age. Nothing
+satisfied my thirst. I eventually took my first college class when I
+was 11 years old (in parallel, finishing elementary and then high
+school). At the age of 20, I finished my M.Sc. in Mathematics, doing
+research in [finite group
+theory](http://www.sciencedirect.com/science/article/pii/S0021869304001863). Then
+I (formally) stopped studying Mathematics and re-focused on my other
+life-long love, software engineering.
 
 I've been writing code professionally, on and off, for almost two
-decades. My last two jobs were at
-[Meteor](https://github.com/meteor/meteor) (a javascript platform and
-framework) and at [Asana](https://asana.com/company) (real-time
+decades. Most recently, I was a very early employee at both
+[Meteor](https://github.com/meteor/meteor) (building a javascript platform and frameworks)
+and [Asana](https://asana.com/company) (building real-time
 collaborative productivity software).
 
-Some stuff I've worked on:
+Right now I'm dedicating myself to studying statistics and machine
+learning.  I'm especially interested in neural networks and their
+applications.
 
-* [The School of Mathematics](http://thewe.net/math/), where people from all background met
+### Some stuff I've worked on
+
+* [The School of Mathematics](http://thewe.net/math/), where people from all backgrounds met
   to discover Mathematics through Socratic dialogue.
-  Here's a [booklet](http://thewe.net/files/shapes_v2_web.pdf) I gave out to people.
+  Here's a [sample booklet](http://thewe.net/files/shapes_v2_web.pdf) I gave out to people.
 * A large-scale C4I system for the Israeli Air Force
-* Optimizing the assembly generation for the [P-Cube](https://en.wikipedia.org/wiki/P-Cube)
-  compiler (and tons of other compiler and embedded parts)
 * A 3D graphics engine in pure assembly (sadly I lost the source code)
-* [TeX THE WORLD](http://thewe.net/tex), a browser plugin to render TeX everywhere
-* [Conversations on Humankind](http://web.archive.org/web/20150726235949/http://www.meetup.com/Conversations-on-Humankind). Inspired by the book "Sapiens: A Brief History of Humankind", we
-  would meet every three weeks to discuss
-  topics about the human condition -- ranging from history, anthropology, psychology,
+* [Conversations on Humankind](http://web.archive.org/web/20150726235949/http://www.meetup.com/Conversations-on-Humankind), a reading and discussion club. Inspired by the book "Sapiens: A Brief History of Humankind", we met to discuss chapters from books ranging from history, anthropology, psychology,
   economics and more.
-* [Formative](http://goformative.com), a system for teachers to share
-  assignments with their students, seeing their results and giving them feedback live.
+* [TeX THE WORLD](http://thewe.net/tex), a browser plugin to render TeX everywhere
+* A Google Wave data synchronization robot written in Clojure.
+  Here's some [code](https://github.com/avital/thewe-clojure-relay/blob/master/clj/thewe.clj).
 * [ShiftSpace](http://web.archive.org/web/20110628211734/http://www.shiftspace.org/),
   an open-source annotation layer on top of any website.
-* A Google Wave data synchronization robot written in Clojure
 
-### Contact
-
-* Email: avital@aoliver.org
-* [Twitter](https://www.linkedin.com/in/avitaloliver)
-* [LinkedIn](https://www.linkedin.com/in/avitaloliver)
 
 
