@@ -39,14 +39,16 @@ applications.
 
 * I founded [The School of Mathematics](http://thewe.net/math/),
   where people from all backgrounds met
-  to discover Mathematics through Socratic dialogue.
+  to discover Mathematics through Socratic dialogue. We got a
+  [bit of press](http://forward.com/culture/14995/truth-seekers-the-pursuit-of-math-03209/).
   Here's a [sample booklet](http://thewe.net/files/shapes_v2_web.pdf) I gave out to people.
 * I worked on a large-scale C4I system for the Israeli Air Force
 * I taught Mathematics at a program for gifted students
 * As part of the [demoscene](https://en.wikipedia.org/wiki/Demoscene),
   I wrote a 3D graphics engine in pure assembly (sadly I lost the source code)
 * I created and coordinated [Conversations on Humankind](http://web.archive.org/web/20150726235949/http://www.meetup.com/Conversations-on-Humankind),
-  a reading and discussion club. Inspired by the book "Sapiens: A Brief History of Humankind", we met to discuss chapters from books ranging from history, anthropology, psychology,
+  a reading and discussion club. Inspired by the book "Sapiens: A Brief History of Humankind", we
+  met to discuss chapters from books ranging from history, anthropology, psychology,
   economics and more.
 * I wrote [TeX THE WORLD](http://thewe.net/tex), a browser plugin to render TeX everywhere
 * I built a Google Wave data synchronization robot written in Clojure.
