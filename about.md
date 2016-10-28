@@ -1,26 +1,60 @@
 ---
 layout: post
 permalink: /about/index.html
-title: About the Theme
-description: Balzac is a new, fluid & responsive theme for Jekyll (and AnchorCMS). It's gloriously beautiful and suited to long form. Built on a SCSS foundation, it's organized and awesome.
-tags: [about, Jekyll, theme, responsive]
+title: Avital Oliver
 image:
   feature: soft-trees.jpg
 ---
 
-This is built on Semantic.gs grid framework which I edited a bit to make it fluid. I hope you enjoy using, forking, whatevering this theme as much as I did making it. 
+### This blog
 
-### Features
-* flexible, uses max-width for responsive goodness
-* responsive drop down menu
-* retina images using @2x
-* post loop in the footer showing 3 latest post
-* custom portfolio page for case studies
+I write about topics in statistics and {machine,deep} learning as I
+work on them or learn about them.
 
-### Acknowledgements
-I utilized my own HTML templates, but had no prior knowledge of liquid nor the required Jekyll system file format. I took [Michael Rose](http://twitter.com/mmistakes)'s theme [Minimal Mistakes](http://mmistakes.github.io/minimal-mistakes/). Having a prebuilt archive and the YAML front-matter already set up was a great help. 
+Inspired by [Julia Evans](http://jvns.ca/), I plan to write about
+things even (especially) when I don't fully understand them. I'd love
+to learn more about anything I'm writing about, please help by leaving
+comments -- especially when I'm wrong.
 
- The lovely font shown here is Calendas. For full splendor on your blog, I suggest you [head over and buy that](http://calendasplus.com/). The full family is 3 weights and costs $3. Many thanks to Daniel Bruce for the wonderful Entypo icons. Those can be picked up at [entypo.com](http://entypo.com), but are included with the source files. It's also <b>retina ready</b> via retina.js. Check out how that works over at [retinajs.com](http://retinajs.com).
+### About me
 
-### The Name
-Balzac was a famous writer, known for his beautiful prose. I read some Balzac in school, but mostly feel comfort in the name of my favorite coffee shop in Stratford, Ontario. 
+I took my first college class when I was 11 years old. When I was 20
+years old, I finished my M.Sc. in Mathematics with a [single published
+paper](http://www.sciencedirect.com/science/article/pii/S0021869304001863)
+on conjugacy classes of finite groups. Then I stopped studying
+Mathematics formally and re-focused on my other love, software
+engineering.
+
+I've been writing code professionally, on and off, for almost two
+decades. My last two jobs were at
+[Meteor](https://github.com/meteor/meteor) (a javascript platform and
+framework) and at [Asana](https://asana.com/company) (real-time
+collaborative productivity software).
+
+Some stuff I've worked on:
+
+* [The School of Mathematics](http://thewe.net/math/), where people from all background met
+  to discover Mathematics through Socratic dialogue.
+  Here's a [booklet](http://thewe.net/files/shapes_v2_web.pdf) I gave out to people.
+* A large-scale C4I system for the Israeli Air Force
+* Optimizing the assembly generation for the [P-Cube](https://en.wikipedia.org/wiki/P-Cube)
+  compiler (and tons of other compiler and embedded parts)
+* A 3D graphics engine in pure assembly (sadly I lost the source code)
+* [TeX THE WORLD](http://thewe.net/tex), a browser plugin to render TeX everywhere
+* [Conversations on Humankind](http://web.archive.org/web/20150726235949/http://www.meetup.com/Conversations-on-Humankind). Inspired by the book "Sapiens: A Brief History of Humankind", we
+  would meet every three weeks to discuss
+  topics about the human condition -- ranging from history, anthropology, psychology,
+  economics and more.
+* [Formative](http://goformative.com), a system for teachers to share
+  assignments with their students, seeing their results and giving them feedback live.
+* [ShiftSpace](http://web.archive.org/web/20110628211734/http://www.shiftspace.org/),
+  an open-source annotation layer on top of any website.
+* A Google Wave data synchronization robot written in Clojure
+
+### Contact
+
+* Email: avital@aoliver.org
+* [Twitter](https://www.linkedin.com/in/avitaloliver)
+* [LinkedIn](https://www.linkedin.com/in/avitaloliver)
+
+
