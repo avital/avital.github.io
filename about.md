@@ -35,19 +35,23 @@ Right now I'm dedicating myself to studying statistics and machine
 learning.  I'm especially interested in neural networks and their
 applications.
 
-### Some stuff I've worked on
+### Some stuff I've done
 
-* [The School of Mathematics](http://thewe.net/math/), where people from all backgrounds met
+* I founded [The School of Mathematics](http://thewe.net/math/),
+  where people from all backgrounds met
   to discover Mathematics through Socratic dialogue.
   Here's a [sample booklet](http://thewe.net/files/shapes_v2_web.pdf) I gave out to people.
-* A large-scale C4I system for the Israeli Air Force
-* A 3D graphics engine in pure assembly (sadly I lost the source code)
-* [Conversations on Humankind](http://web.archive.org/web/20150726235949/http://www.meetup.com/Conversations-on-Humankind), a reading and discussion club. Inspired by the book "Sapiens: A Brief History of Humankind", we met to discuss chapters from books ranging from history, anthropology, psychology,
+* I worked on a large-scale C4I system for the Israeli Air Force
+* I taught Mathematics at a program for gifted students
+* As part of the [demoscene](https://en.wikipedia.org/wiki/Demoscene),
+  I wrote a 3D graphics engine in pure assembly (sadly I lost the source code)
+* I created and coordinated [Conversations on Humankind](http://web.archive.org/web/20150726235949/http://www.meetup.com/Conversations-on-Humankind),
+  a reading and discussion club. Inspired by the book "Sapiens: A Brief History of Humankind", we met to discuss chapters from books ranging from history, anthropology, psychology,
   economics and more.
-* [TeX THE WORLD](http://thewe.net/tex), a browser plugin to render TeX everywhere
-* A Google Wave data synchronization robot written in Clojure.
+* I wrote [TeX THE WORLD](http://thewe.net/tex), a browser plugin to render TeX everywhere
+* I built a Google Wave data synchronization robot written in Clojure.
   Here's some [code](https://github.com/avital/thewe-clojure-relay/blob/master/clj/thewe.clj).
-* [ShiftSpace](http://web.archive.org/web/20110628211734/http://www.shiftspace.org/),
+* I worked on [ShiftSpace](http://web.archive.org/web/20110628211734/http://www.shiftspace.org/),
   an open-source annotation layer on top of any website.
 
 
