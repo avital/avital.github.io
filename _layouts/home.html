@@ -7,6 +7,9 @@
                  <lh><h2><span class="bb">{{ page.title }}</span></h2></lh>
                   {% for post in site.posts %}
                   <li>
+                    {% if post.title_image %}
+                      <img width="100%" src="{{ post.title_image }}" />
+                    {% endif %}
                     <div class="deets" itemscope itemtype="http://schema.org/BlogPosting" itemprop="blogPost">
                         <h1><a href="{{ site.url }}{{ post.url }}">{{ post.title }}</a></h1>
                         <p class="date"><time datetime="{{ post.date | date_to_xmlschema }}" itemprop="datePublished">{{ post.date | date: "%B %d, %Y" }}</time></p>
