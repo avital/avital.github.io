@@ -56,5 +56,7 @@ applications.
 * I worked on [ShiftSpace](http://web.archive.org/web/20110628211734/http://www.shiftspace.org/),
   an open-source annotation layer on top of any website.
 
-
+<font size="2">
+Title image: &quot;<a href='https://www.flickr.com/photos/timetrax/376152628/' target='_blank'>library books</a>&quot;&nbsp;(<a rel='license' href='https://creativecommons.org/licenses/by-sa/2.0/' target='_blank'>CC BY-SA 2.0</a>)&nbsp;by&nbsp;<a xmlns:cc='http://creativecommons.org/ns#' rel='cc:attributionURL' property='cc:attributionName' href='https://www.flickr.com/people/timetrax/' target='_blank'>timetrax23</a>
+</font>
 
