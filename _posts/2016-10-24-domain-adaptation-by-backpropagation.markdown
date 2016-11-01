@@ -16,73 +16,27 @@ selection of training examples. *This is fine when the deployed model
 sees the same distribution as the training set. Often, though, this
 isn't the case.*<!--more-->
 
-Let's say we're trying to build a system that predicts whether an
-image is a cat or a dog. And there are many examples out there for
-images with a label for "cat" or "dog". We can train a neural network
-on this dataset and get very high accuracy on a held-out portion of
-the same dataset from which we trained the network. From a statistical
-perspective, we say that the images were sampled from a distribution
-(which we don't know). And testing on a held-out portion of data means
-that the model that we trained on a portion of our data has is
-accurate when predicting on a held-out portion sampled from the *same
-distribution*.
+Let's say we're predicting whether an
+image is a cat or a dog. We have access to tons of cat and dog images. These images were all taken from the same camera. We train our neural network on this dataset and get high accuracy on a held-out validation set. But when we deploy this model, it mispredicts images uploaded by users. Those images all came from a phone camera.
 
-But what if we want our model to predict well on images from a
-different distribution?
+We can explain this with statistical language. Our training set was sampled from the distribution of cat and dog images from one camera. We call this the "source distribution". The distribution of test examples, the "target distribution", is different. This problem is formally known as "domain adaptation"/"domain transfer", or specifically, "covariate shift".
 
-For example, maybe we want to guess "cat" or "dog" from images that
-came from an old kind of camera, where the colors come out very
-different. Or maybe all the images we have are blurry in a certain
-kind of way.
+How do we fix our model to perform well on the target distribution?
 
-If we just trained a model on images from modern cameras (the "source"
-distribution) and try to predict on older cameras (the "target"
-distribution), our model will perform much more poorly than we'd
-expect by looking at the test accuracy alone.
+We could collect tons of labelled images from the target distribution. Then we could train a new model from a combination of the source and target distributions. If we can do that, we'll end up with a model that predicts well for both distributions.
 
-How do we solve this problem? The first observation is that there
-definitely is a model that would correctly predict on images from both
-types of cameras. If we had access to an equally large dataset of
-labelled images taken from the old camera, we could train the model
-from the combined distribution of images taken from both kinds of
-cameras. Our model then could learn to predict well for images from
-both distributions.
-
-Here's the kicker though. We don't have labels for images taken from
-the old camera. In fact, we may not even have any images of dogs or
-cats taken with the old camera. We just have a huge pile of
-images. With no labels whatsoever.
-
-Here comes domain adaptation, or more specifically, "covariate shift".
-
-We want to learn from the distribution of target images (without
-labels), in addition to the distribution of source images (with
-labels). And our output should be a model that can predict correctly
-for images from both distributions.
-
-I recently read a cool paper about this topic, that presents a very
-clean approach for adding this kind of ability to any feed-forward
-neural network. This includes convolutional neural networks commonly
-used for image classification.
-
-I am personally working on audio applications but using SFTF
-spectrograms one can (sort of) convert audio to images, so I'm hoping
-the same approach might work.
+But collecting those labels could be expensive or even impossible. Maybe the images we can get from the target distribution aren't even dogs or cats. What if all we have is a ton of images from the target distribution? With no labels. Can we use those to improve our model?
 
 ## Unsupervised Domain Adaptation by Backpropagation
 
-Here's the paper: [https://arxiv.org/abs/1409.7495]
+Ganin and Lempitsky wrote [a great paper](https://arxiv.org/abs/1409.7495) on solving this problem for neural networks. Their solution is simple. It works for any feed-forward neural network, such as ConvNets. It is easy to implement it in any deep learning framework. And it beats state of the art on standard [domain adaptation datasets](https://cs.stanford.edu/~jhoffman/domainadapt/#datasets_code).
 
-In short, what they do is take a neural network architecture designed
-for image classification. They split the network into two
-portions. The first portion is the "feature extractor", where
-high-level features of the images are discovered (e.g. "circle",
-"nose", ...). The second portion is the "label predictor", where these
-features are combined to predict "cat" or "dog". The split between the
-two section isn't well-defined and probably some trial and error is
-needed to choose a good split. Maybe the common split is between the
-convolution layers and the fully-connected layers commons used at the
-end of a CNN.
+Here's what they do. Start with a neural network architecture proven to work for your classification problem. The paper uses LeNet-5 for MNIST and AlexNet for ImageNet. Then, split the network into two
+parts. The first part, the "feature extractor", consists of the lower layers. The feature extractor detects high-level features of the images. The second part, the "label predictor", consists of the upper layers. The label predictor is where features are combined to predict "cat" or "dog". In the paper, they always split at the point where fully-connected layers start.
+
+(image from top of page 10)
+
+XCXC stop here
 
 Then, they add another set of parallel layers on top of the feature
 extractor, called the domain classifier. This section of the network
