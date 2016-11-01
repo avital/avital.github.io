@@ -371,15 +371,21 @@ header.site-header nav {
             font-size: $fs3;
             margin-bottom: $lh*2;
             position: relative;
-            
-            a {
+
+            a.read-more-link {
+                text-decoration: underline;
+                font-weight: bold;
+                float: right;
+            }
+
+            a.post-link {
                 position: relative;
                 &:hover {
                     @include transit;
                 }
             }
             
-            a:hover:before {
+            a.post-link:hover:before {
                 content:'...';
                 color: $grey-light;
                 font-family: $sans;
@@ -392,7 +398,7 @@ header.site-header nav {
                 @include transit;
             }
             
-            a:before {
+            a.post-link:before {
                 content:'\201c';
                 color: $grey-light;
                 position: absolute;

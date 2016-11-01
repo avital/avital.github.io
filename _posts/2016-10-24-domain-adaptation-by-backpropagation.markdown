@@ -2,9 +2,19 @@
 layout: post
 title: Domain Adaptation by Backpropagation
 date: 2016-10-24 18:27:31
+image:
+  feature: domain-adaptation-by-backprop.png
+title_image: images/domain-adaptation-by-backprop-title.png
+excerpt_separator: <!--more-->
 ---
 
-## Background
+
+In supervised learning, we train neural networks on a large set of
+labelled examples. We test the accuracy of a trained model on a
+held-out test set. A common choice for the test is a small random
+selection of training examples. *This is fine when the deployed model
+sees the same distribution as the training set. Often, though, this
+isn't the case.*<!--more-->
 
 Let's say we're trying to build a system that predicts whether an image is a cat or a dog. And there are many examples out there for images with a label for "cat" or "dog". We can train a neural network on this dataset and get very high accuracy on a held-out portion of the same dataset from which we trained the network. From a statistical perspective, we say that the images were sampled from a distribution (which we don't know). And testing on a held-out portion of data means that the model that we trained on a portion of our data has is accurate when predicting on a held-out portion sampled from the *same distribution*.
 
