@@ -33,7 +33,9 @@ collaborative productivity software).
 
 Right now I'm dedicating myself to studying statistics and machine
 learning.  I'm especially interested in neural networks and their
-applications.
+applications. I love explaining things in simple terms and making
+things intuitive. Part of the purpose of this blog is to exercise
+"If you can't explain it simply, you don't understand it well enough."
 
 ### Some stuff I've done
 
