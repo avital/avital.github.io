@@ -8,106 +8,204 @@ title_image: images/domain-adaptation-by-backprop-title.png
 excerpt_separator: <!--more-->
 ---
 
-
-In supervised learning, we train neural networks on a large set of
+In supervised learning, we train neural networks on a ton of
 labelled examples. We test the accuracy of a trained model on a
-held-out test set. A common choice for the test is a small random
-selection of training examples. *This is fine when the deployed model
-sees the same distribution as the training set. Often, though, this
-isn't the case.*<!--more-->
+held-out test set. A common choice for the test set is a random
+selection of 20% of the training examples. *This is fine when the deployed model
+sees the same distribution as the training set. In practice, this often
+isn't the case*. We can solve this with **domain adaptation**. All we need is an
+**unlabelled data set** from the distribution the model tests on.
+I'll describe a simple technique by Ganin and Lempitsky to do that.<!--more-->
 
-Let's say we're predicting whether an
-image is a cat or a dog. We have access to tons of cat and dog images. These images were all taken from the same camera. We train our neural network on this dataset and get high accuracy on a held-out validation set. But when we deploy this model, it mispredicts images uploaded by users. Those images all came from a phone camera.
+This post explains the approach proposed in [this great
+paper](https://arxiv.org/abs/1409.7495). It's a simple solution that
+works for any feed-forward network, such as ConvNets. It is easy to
+implement in any deep learning framework. And it beats state of the
+art on standard [domain adaptation
+datasets](https://cs.stanford.edu/~jhoffman/domainadapt/#datasets_code).
 
-We can explain this with statistical language. Our training set was sampled from the distribution of cat and dog images from one camera. We call this the "source distribution". The distribution of test examples, the "target distribution", is different. This problem is formally known as "domain adaptation"/"domain transfer", or specifically, "covariate shift".
+## Background: Covariate Shift
 
-How do we fix our model to perform well on the target distribution?
+Covariate shift and domain adaptation are relevant for any machine
+learning problem. I'll illustrate the problem and this solution using
+the following toy machine learning problem.
 
-We could collect tons of labelled images from the target distribution. Then we could train a new model from a combination of the source and target distributions. If we can do that, we'll end up with a model that predicts well for both distributions.
+Let's say we're predicting whether an image is a cat or a dog. We have
+access to tons of cat and dog images. These images were all taken from
+a few different camera types. We train our neural network on this
+dataset and get 90% accuracy on a held-out validation set. Woohoo! Success!
 
-But collecting those labels could be expensive or even impossible. Maybe the images we can get from the target distribution aren't even dogs or cats. What if all we have is a ton of images from the target distribution? With no labels. Can we use those to improve our model?
+But then...
+
+When we deploy our model, it mispredicts many images uploaded by
+certain users. Turns out, our model is inaccurate when photos come
+from certain phone cameras. We didn't have images from that camera
+in our training set. Images taken from those cameras look different
+enough, so that our model just doesn't work well on them. Here's an example:
+
+<img src="images/domain-adaptation-example.png" />
+
+This might seem like an overfitting problem. The #1 way to solve
+overfitting is to collect more data. But that only works if the new
+data comes from the distribution you'll be testing on. It might be
+expensive to get labelled photos of dogs and cats from this other
+camera.
+
+Another case where domain adaptation can help is when training on
+synthetic data. It can be extremely cheap to generate a synthetic data
+set. But a model trained on synthetic data might not predict well on
+real world examples. How can we adapt the learning from the synthetic
+dataset, so that it works well on the real dataset? (I wonder if
+this comes up when training reinforcement learning models via
+simulators such as MuJoCo. Does anyone know?)
+
+Statistically, we say that our training set is sampled from a **source
+distribution**. And our test examples are sampled from a **target
+distribution**. We don't know either of these distributions directly. But
+we approximate them with datasets. The fact that these
+distributions differ is called
+*covariate shift*. Techniques to solve this problem are called *domain
+adaptation*. (I think I'm a little wrong about the exact terminology here --
+I'd appreciate a clarification.)
+
+To solve this, we need to know something about the target
+distribution. Here's the key insight. Collecting labelled data from
+the target distribution might be expensive. But collecting **unlabelled
+data** might be easy. In the example described above,
+*we get free data from users
+taking photos with our app*.
+
+To summarize, we have:
+1. A labelled dataset from the source distribution
+2. An unlabelled dataset from the target distribution
+
+How can we train a model to predict labels well on both datasets?
 
 ## Unsupervised Domain Adaptation by Backpropagation
 
-Ganin and Lempitsky wrote [a great paper](https://arxiv.org/abs/1409.7495) on solving this problem for neural networks. Their solution is simple. It works for any feed-forward neural network, such as ConvNets. It is easy to implement it in any deep learning framework. And it beats state of the art on standard [domain adaptation datasets](https://cs.stanford.edu/~jhoffman/domainadapt/#datasets_code).
+Here's Ganin and Lempitsky's approach, which they call _Unsupervised
+Domain Adaptation by Backpropagation_.
 
-Here's what they do. Start with a neural network architecture proven to work for your classification problem. The paper uses LeNet-5 for MNIST and AlexNet for ImageNet. Then, split the network into two
-parts. The first part, the "feature extractor", consists of the lower layers. The feature extractor detects high-level features of the images. The second part, the "label predictor", consists of the upper layers. The label predictor is where features are combined to predict "cat" or "dog". In the paper, they always split at the point where fully-connected layers start.
+They start with a neural network architecture designed for a
+particular classification problem. For example, LeNet-5 for MNIST and
+AlexNet for ImageNet. Then, they give names to two parts of the
+network. The first part, the "feature extractor", consists of the
+lower layers. The feature extractor detects high-level features of the
+images. The second part, the "label predictor", consists of the upper
+layers. The label predictor combines features to predict "cat" or
+"dog". In the paper, the split is at the point where fully-connected
+layers start.
 
-(image from top of page 10)
+<img src="images/domain-adaptation-mnist.png" />
 
-XCXC stop here
+Then, they add parallel layers on top of the feature extractor, called
+the domain classifier. In the diagram, these appear on the bottom in
+pink. This new part of the network will learn to detect whether an
+image came from the source or target domains. What's this "GRL" circle
+you ask? Wait for it...
 
-Then, they add another set of parallel layers on top of the feature
-extractor, called the domain classifier. This section of the network
-tries to learn to distinguish whether an input was sampled from the
-source or target domains. In our case, it learns to distinguish
-whether an image was taken from an new camera or an old camera.
+The kicker (and the insight behing GRL) is how we train this
+network. We want [feature extractor → label predictor] to be good at
+predicting "cat" or "dog". We only have labels for images from the
+source distribution, so this only makes sense for those.
 
-The kicker is how we train this network. We train it so that the
-combination of (feature extractor, label predictor) is as good as we
-can make it at predicting the label (in our case, "cat" or "dog") for
-images taken with the new camera. We also train it so that the
-combination of (feature extractor, domain classifier) is as *bad* as
-possible at predicting which domain the image came from. But!! We want
-the domain classifier itself, if we don't change the feature extractor
-to be as *good* as it can at predicting the domain. The domain
-classifier is fighting the feature extractor -- the feature extractor
-changes as to make the domain classifier do a poor job at classifying,
-while the domain classifier changes as to make that part of the
-feature extractor's job fail. All of this is happening *while* the
-label predictor is learning to get better at emitting "cat" or "dog.
+We also want
+[feature extractor → domain classifier] to be **bad** at predicting
+"source" or "target". But!! We want the domain classifier itself to be
+**good** at predicting the domain. How can we get both of these goals?
 
-Over time, the feature extractor layers end up finding the common
-features that aren't distinguishable between the source and target
-distributions, while the label predictor learns to predict "dog" or
-"cat" for images from the source distribution (remember, that's the
-only distribution on which we have labels). So, if this game works
-well, then at the end we can drop the domain classifier portion and
-we've trained a neural network to predict "dog" or "cat" for images
-that come from either the source or target distributions!
+## Desired training goal
 
-## Training
+Let's clarify the training goal. We train the feature extractor
+and label predictor as usual. Then we add something: the domain
+classifier is fighting the feature extractor. (In part, this resembles
+the training regimen of Generative Adversarial Networks. Can someone
+help compare and contrast?)
 
-How can we train this model? We can’t apply backpropagation directly,
-because backpropagation will make all layers of the network try to
-minimize the same loss function. Let’s see what we want the three
-portions of the network to do:
+This is what we want to happen during training:
 
-1. The label predictor is trying to get better at predicting “dog” or
-“cat” for `G_f(input)` where `input` is sampled from the source
-distribution
+1. The domain classifier should get better.
+2. The label predictor should get better.
+3. The feature extractor should change such that [feature extractor → label predictor] gets better.
+4. The feature extractor should change such that [feature extractor → domain classifier] gets **worse**.
 
-2. The domain classifier is trying to get better at predicting
-“source” or “target” for `G_f(input)` where `input` is sampled from
-either distribution
+(1) and (4) are what make the feature extractor learn features common
+to both source and target distributions.
 
-3. The feature extractor is trying to make the label predictor right
+(2) and (3) are what make [feature extractor → label predictor]
+predict "dog" or "cat".
 
-4. The feature extractor is also trying to make the domain classifier
-*wrong*
+If this training regimen works well, we then abandon the domain
+classifier. The remaining network predicts "dog" or "cat" for images
+from either source or target distributions! That would be great!
 
-The reason back propagation can’t work as-is, is that we can’t devise
-a loss function for the network that gets both:
+But there's a problem.
 
-a. domain classifier getting worse (see 3 above)
+(1) and (4) are in conflict about what they're optimizing. We need to find a
+clever way around that.
 
-b. domain classifier getting better (see 2 above)
+## Gradient Reversal Layer
 
-How do we fix this?
+<img src="images/domain-adaptation-by-backprop-title.png" />
 
-Let’s start with our loss function. The loss function we’ll use is:
+Let’s start by defining a loss function. This combines the loss
+from both the domain classifier and the label predictor:
 
-(insert loss function)
+<p> <!-- needed for correct font size in MathJax -->
+$$
+E(\theta_f, \theta_y, \theta_d) =
+\sum_{i\in\text{source domain}} L_y^i(\theta_f, \theta_y) -
+\lambda \sum_{i} L_d^i(\theta_f, \theta_d)
+$$
+</p>
 
-So, minimizing this loss function would correctly achieve (1), (2) and
-(3). But it would lead to the opposite of (4).
+Where:
+* $$\theta_f$$, $$\theta_y$$, $$\theta_d$$ are the respective parameters
+of the feature extrator, label predictor and domain classifier
+* $$L_y^i$$ is the loss from the
+label predictor for $$i$$th image. These values are only defined for
+images from the source distribution (only those have labels.)
+* $$L_d^i$$ is the loss from the domain classifier (defined
+for examples from both domains.)
+for training example $$i$$.
+* $$\lambda>0$$ is a hyperparameter we can tweak. Setting $$\lambda$$
+too low would lead to poor transfer from the source domain to the
+target domain. Setting $$\lambda$$
+too high would reduce classification accuracy on the source domain (and thus
+on the problem at large).
 
-The fix is (drumroll...): When back-propagating gradients from the
-domain classifier back to the feature extractor, we *reverse* the
-gradient by multiplying it by `-\lambda` where `\lambda` is a
-hyperparameter. We do this by adding a layer called a “gradient
-reversal layer” that breaks the normal rules of differentiation by
-passing as a no-op on the forward prop, while multiplying by
-`-\lambda` on the backprop. This layer can be easily implemented in
-any deep learning library.
+We don't quite want to minimize $$E$$ -- let's see why. Let's revisit
+points (1) to (4) above. What would happen during training if we try to minimize $$E$$?
+
+1. The domain classifier should get getter. **<span style="color:red">✗</span>**
+2. The label predictor should get better. **<span style="color:green">✓</span>**
+3. The feature extractor should change such that [feature extractor → label predictor] gets better. **<span style="color:green">✓</span>**
+4. The feature extractor should change such that [feature extractor → domain classifier] gets worse. **<span style="color:green">✓</span>**
+
+...we... ALMOST have it. If we're optimizing $$E$$ as defined above,
+the domain classifier will get worse.
+
+Here's how we fix it: *Break the rules of
+differentiation!*. Specifically, we introduce a new kind of layer. The
+GRL, or *Gradient Reversal Layer*, is a psuedo-function
+$$R_\lambda(x)$$ such that:
+1. <!-- force inline equation -->$$R_\lambda(x) = x$$
+2. <!-- force inline equation -->$$\frac{dR\lambda(x)}{dx} = -\lambda \bf{I}$$
+
+Of course, such a function doesn't *actually* exist. But remember
+how backpropagation works. Layers are defined by what they do
+during feedforward and separately what they do during backprop.
+The backprop function is *normally* the derivative of the feedforward function.
+But we can definitely define $R_\lambda(x)$ in deep learning libraries
+such as TensorFlow or Theano.
+
+xcxc revisit here. do we need to define E~?
+
+xcxc explain saddle point?
+
+xcxc domain-invariant
+xcxc discriminative
+
+xcxc find a nice way to close the article
+
+</p>
