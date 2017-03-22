@@ -9,52 +9,31 @@ image:
 I write about topics in mathematics, statistics and {machine,deep} learning as I
 work on them or learn about them.
 
-Inspired by [Julia Evans](http://jvns.ca/), I write about things even
-(especially) when I don't fully understand them. I'd love to learn
-more about what I write about. Please help by leaving comments --
-especially when I'm wrong.
-
 ### About me
 
-I fell in love with Mathematics at an extremely young age. Nothing
-satisfied my thirst. I eventually took my first college class when I
-was 11 years old (in parallel, finishing elementary and then high
-school). At the age of 20, I finished my M.Sc. in Mathematics, doing
-research in [finite group
-theory](http://www.sciencedirect.com/science/article/pii/S0021869304001863). Then
-I (formally) stopped studying Mathematics and re-focused on my other
-life-long love, software engineering.
+I spent roughly the first 25 years of my life studying and teaching mathematics,
+culminating in an [M.Sc. in mathematics](http://www.sciencedirect.com/science/article/pii/S0021869304001863), a year as a visiting student at Rutgers, and founding an [informal school of mathematics](http://thewe.net/math).
 
-I've been writing code professionally, on and off, for almost two
-decades. Most recently, I was a very early employee at both
-[Meteor](https://github.com/meteor/meteor) (building a javascript platform and frameworks)
-and [Asana](https://asana.com/company) (building real-time
+I've also been a professional software engineer, on and off, for almost two
+decades. Most recently, I was a very early employee at
+[Meteor](https://meteor.com) (complete open-source javascript platform, over 35k github stars)
+and [Asana](https://asana.com/company) (real-time
 collaborative productivity software).
 
 Right now I'm dedicating myself to studying statistics and machine
-learning.  I'm especially interested in neural networks and their
-applications. I love explaining things in simple terms and making
-things intuitive. Part of the purpose of this blog is to exercise
-"If you can't explain it simply, you don't understand it well enough."
+learning.  I'm especially interested in neural networks and Bayesian
+inference.  I believe that the most robust methods and applications
+arise from strong foundations. I try to find, understand and explain those
+foundations.
 
-### Some stuff I've done
+### Some other stuff I've done
 
-* I founded [The School of Mathematics](http://thewe.net/math/),
-  where people from all backgrounds met
-  to discover Mathematics through Socratic dialogue. We got a
-  [bit of press](http://forward.com/culture/14995/truth-seekers-the-pursuit-of-math-03209/).
-  Here's a [sample booklet](http://thewe.net/files/shapes_v2_web.pdf) I gave out to people.
-* I worked on a large-scale C4I system for the Israeli Air Force
-* I taught Mathematics at a program for gifted students
-* As part of the [demoscene](https://en.wikipedia.org/wiki/Demoscene),
-  I wrote a 3D graphics engine in pure assembly (sadly I lost the source code)
+* A [sample booklet](http://thewe.net/files/shapes_v2_web.pdf) I used to recruit for my math cult.
 * I created and coordinated [Conversations on Humankind](http://web.archive.org/web/20150726235949/http://www.meetup.com/Conversations-on-Humankind),
-  a reading and discussion club. Inspired by the book "Sapiens: A Brief History of Humankind", we
-  met to discuss chapters from books ranging from history, anthropology, psychology,
+  a reading and discussion club. Inspired by the book ["Sapiens: A Brief History of Humankind"](https://www.amazon.com/Sapiens-Humankind-Yuval-Noah-Harari/dp/0062316095) (you should read it), we
+  discussed chapters from books ranging from history, anthropology, psychology,
   economics and more.
 * I wrote [TeX THE WORLD](http://thewe.net/tex), a browser plugin to render TeX everywhere
-* I built a Google Wave data synchronization robot written in Clojure.
-  Here's some [code](https://github.com/avital/thewe-clojure-relay/blob/master/clj/thewe.clj).
 * I worked on [ShiftSpace](http://web.archive.org/web/20110628211734/http://www.shiftspace.org/),
   an open-source annotation layer on top of any website.
 
