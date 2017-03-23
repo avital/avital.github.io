@@ -1,7 +1,7 @@
 module Jekyll
   module StripPTags
     def strip_p_tags(html)
-#      html.gsub(%r{\<\/?p.*?\>}, '')
+      html.gsub(%r{\<\/?p.*?\>}, '')
     end
   end
 end
