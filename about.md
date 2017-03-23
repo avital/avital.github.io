@@ -11,7 +11,7 @@ work on them or learn about them.
 
 ### About me
 
-I spent roughly the first 25 years of my life studying and teaching mathematics,
+I spent most of my early years studying and teaching mathematics,
 culminating in an [M.Sc. in mathematics](http://www.sciencedirect.com/science/article/pii/S0021869304001863), a year as a visiting student at Rutgers, and founding an [informal school of mathematics](http://thewe.net/math).
 
 I've also been a professional software engineer, on and off, for almost two
