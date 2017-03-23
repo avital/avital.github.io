@@ -1,7 +1,7 @@
 import re
 import sys
 
-def main(content):
+def main(content, pdf_filename):
     flags = re.DOTALL
     content = re.sub(r'\$', '$$', content, 0, flags)
 
@@ -21,7 +21,7 @@ def main(content):
     content = re.sub(r'\\emph{(.*?)}', '**\\1**', content, 0, flags)
     content = re.sub(r'\\end\{document\}', '', content, 0, flags)
     content = re.sub(r'.*\\maketitle', '', content, 0, flags)
-    content = re.sub(r'\\section', '<!--more-->\n\\section', content, 1, flags)
+    content = re.sub(r'\\section', '<!--more-->\n(This note is also available as a [PDF](/assets/{0}).)\n\\section'.format(pdf_filename), content, 1, flags)
     content = re.sub(r'\\section{(.*?)}', '## \\1', content, 0, flags)
 
     # Weird but we need 6 backslashes for a newline
@@ -56,5 +56,8 @@ Foo & = & Bar
     print(main(ex))
 
 elif __name__ == "__main__":
-    print(main(sys.stdin.read()))
+    if len(sys.argv) <= 1:
+        print("Usage: python tex-to-markdown.py <PDF filename>")
+        exit(1)
+    print(main(sys.stdin.read(), sys.argv[1]))
 

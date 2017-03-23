@@ -37,20 +37,22 @@ $serif: "Calendas Plus","Crimson Text", "Hoefler Text", "Georgia", serif;
 
 /** * 12 & 16 as roots then powers of two. */
 
-$fs1:64px;
-$fs2:48px;
-$fs3:32px;
-$fs4:24px;
+$sizescale: 0.85;
 
-$fsp:22px;
+$fs1:64px * $sizescale;
+$fs2:48px * $sizescale;
+$fs3:32px * $sizescale;
+$fs4:24px * $sizescale;
 
-$fs5:16px;
-$fs6:12px;
+$fsp:22px * $sizescale;
+
+$fs5:16px * $sizescale;
+$fs6:12px * $sizescale;
 
 // Line Height
 
-$lh: 33px;
-$lhsmall: 24px;
+$lh: 33px * $sizescale;
+$lhsmall: 24px * $sizescale;
 
 // Sizing 
 $footerHeight: 320px;

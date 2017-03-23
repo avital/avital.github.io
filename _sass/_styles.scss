@@ -162,7 +162,7 @@ input {
 
 .post {
     @include column(8);
-    max-width: 860px;
+    max-width: 760px;
     display: block;
     margin: 0 auto;
     float: none;
@@ -277,8 +277,8 @@ header.site-header nav {
     
     .overlay {
         vertical-align: middle;
-        min-height: 360px;
-        height: 50vh;
+        min-height: 60px;
+//        height: 50vh;
         width: 100%;
         max-height: 800px;
         position: absolute;
@@ -290,9 +290,10 @@ header.site-header nav {
     }
     
     .featured-image {
+        visibility: hidden;
         vertical-align: middle;
-        min-height: 360px;
-        height: 50vh;
+        min-height: 0px; // was 360px
+        height: 0px; // was 50vh
         width: 100%;
         max-height: 800px;
         background-position: center center;
@@ -311,7 +312,7 @@ header.site-header nav {
     
     // Header Stuff
     header {
-        margin: (2*$lh) 0 $lh 0;
+        margin: (3*$lh) 0 $lh 0;
         hgroup {
             color: $black;
             position: relative;
