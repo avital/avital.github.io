@@ -1,0 +1,14 @@
+/* TEAM */
+Creator: Avital Oliver
+Contact: avital@aoliver.org
+Twitter: avitaloliver
+Location: San Francisco, CA
+                           
+/* THANKS */                           
+Creator of Balzac theme: Cole Townsend
+Twitter: @twnsndco
+
+/* SITE */                         
+Last update: 2017-03-22
+Standards:                         
+Software: 

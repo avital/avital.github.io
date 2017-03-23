@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="en" prefix="og: http://ogp.me/ns#">
+<head>
+<!-- Load MathJax -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({ TeX: { equationNumbers: {autoNumber: "all"} } });
+</script>
+
+<script type="text/javascript" async
+        src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+
+</head>
+<meta charset="utf-8">
+<title>Why Mean Squared Error and L2 regularization? A probabilistic justification. &#8211; Avital Oliver</title>
+<meta name="description" content="">
+<meta name="keywords" content="">
+
+<!-- DSLs for various open graph languages -->
+<meta property="og:locale" content="en_US">
+<meta property="og:title" content="Why Mean Squared Error and L2 regularization? A probabilistic justification. &#8211; Avital Oliver">
+<meta property="og:description" content="When you solve a regression problem with gradient descent, you’reminimizing some differentiable loss function. The mo...">
+<meta property="og:url" content="http://localhost:4000/why-mse">
+<meta property="og:site_name" content="Avital Oliver">
+
+
+
+
+
+<link href="http://localhost:4000/feed.xml" type="application/atom+xml" rel="alternate" title="Avital Oliver Feed">
+
+<!-- http://t.co/dKP3o1e -->
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- Type -->
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Crimson+Text:400,400italic,700,700italic" rel='stylesheet' type='text/css' />
+<link href="//fonts.googleapis.com/css?family=Source+Sans+Pro:400,700" rel='stylesheet' type='text/css'>
+<link rel="stylesheet" href="http://localhost:4000/assets/css/entypo.css" media="all">
+
+<!-- In order to use Calendas Plus, you must first purchase it. Then, create a font-face package using FontSquirrel.
+<link rel='stylesheet' href='http://localhost:4000/assets/cal.css' media='all' />
+-->
+
+
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="http://localhost:4000/assets/css/i.css">
+
+<!-- Fresh Squeezed jQuery -->
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
+
+<meta http-equiv="cleartype" content="on">
+
+<!-- Load Modernizr -->
+<script src="http://localhost:4000/assets/js/vendor/modernizr-2.6.2.custom.min.js"></script>
+
+
+<!-- Icons -->
+<!-- 16x16 -->
+<link rel="shortcut icon" href="http://localhost:4000/favicon.ico">
+
+<div id="bump">
+  <body class="">
+    <header class="site-header">
+      <div class="wrap">
+        <hgroup>
+          <h1><a href="/">Avital Oliver</a></h1>
+        </hgroup>
+        <a href="#nav" class="menu"><span class='icons'>☰</span></a>
+        <nav role="navigation">
+          <ul>
+            <li>
+              <a href="/" title="Avital Oliver">Home</a>
+            </li>
+            
+            
+                <li><a href="http://localhost:4000/about" >About</a></li>
+            
+
+          </ul>
+        </nav>
+      </div>
+    </header>
+
+
+<section class="article">
+
+
+  <div class="overlay"></div>
+  <div class="featured-image" style="background-image: url(http://localhost:4000/images/typewriter.jpg)"></div>
+
+
+
+      <article class="wrap post">
+        <header class="post-header">
+          <hgroup>
+            <h1>Why Mean Squared Error and L2 regularization? A probabilistic justification.</h1>
+            <p class="date">Mar 20, 2017</p>
+            <p class="intro"></p>
+          </hgroup>
+        </header>
+
+        <p>When you solve a regression problem with gradient descent, you’re
+minimizing some differentiable loss function. The most commonly used
+loss function is mean squared error (aka MSE, <script type="math/tex">\ell_2</script> loss). Why? Here is a simple probabilistic justification, which can also be used to explain <script type="math/tex">\ell_1</script> loss,
+ as well as <script type="math/tex">\ell_1</script> and <script type="math/tex">\ell_2</script> regularization.</p>
+
+<!--more-->
+<p>(This note is also available as a <a href="/assets/why-mse.pdf">PDF</a>.)</p>
+<h2 id="what-is-regression">What is regression?</h2>
+
+<p>What is a regression problem? In simplest form, we have a dataset <script type="math/tex">\mathcal{D}=\{ (x_i \in \mathbb{R}^n, y_i \in \mathbb{R} ) \}</script> and want a function <script type="math/tex">f</script> that approximately maps <script type="math/tex">x_i</script> to <script type="math/tex">y_i</script> without overfitting. We typically choose a function (from some family <script type="math/tex">\Theta</script>) parametrized by <script type="math/tex">\theta</script>. A simple parametrization is <script type="math/tex">f_\theta:x \mapsto x \cdot \theta</script> where <script type="math/tex">\theta \in \Theta = \mathbb{R}^n</script> – this is linear regression. Neural networks are another kind of parametrization.</p>
+
+<p>Now we use some optimization scheme to find a function in that family that minimizes some loss function on our data. Which loss function should we use? People commonly use mean squared error (aka <script type="math/tex">\ell_2</script> loss):
+<script type="math/tex">\frac{1}{|\mathcal{D}|}\sum(y_i - f_\theta(x_i))^2</script>. Why?</p>
+
+<h2 id="two-assumptions-1-data-is-noisy-2-we-want-the-most-likely-model">Two assumptions: (1) Data is noisy; (2) We want the most likely model</h2>
+
+<p>Let’s start with a few assumptions:</p>
+
+<ol>
+  <li>The data is generated by a function in our family, parametrized by <script type="math/tex">\theta_\text{true}</script>, plus noise, which can be modeled by a zero-mean Gaussian random variable:
+\begin{equation}
+f_\text{data}(x) = f_{\theta_\text{true}}(x) + \epsilon
+\end{equation}
+\begin{equation}
+\epsilon \sim \mathcal{N}(0, \sigma^2)
+\end{equation}
+(Why Gaussian? We’ll get back to this question later.)</li>
+  <li>Given the data, we’d like to find the most probable model within our family. Formally,
+we’re looking for parameters <script type="math/tex">\theta</script> with the highest probability:
+\begin{equation}
+\operatorname*{arg\,max}_\theta(P(\theta \mid \mathcal{D}))
+\end{equation}</li>
+</ol>
+
+<p>With these assumptions, we can derive <script type="math/tex">\ell_2</script> loss as the principled error metric to optimize. Let’s see how.</p>
+
+<h2 id="probability-of-data-given-parameters">Probability of data given parameters</h2>
+<p>First, observe that with these two assumptions, we can derive the probability of a particular datapoint <script type="math/tex">(x, y)</script>:</p>
+
+<p>\begin{align}
+P((x, y) \in \mathcal{D} \mid \theta) &amp; = 
+P(y=f_\theta(x) + \epsilon \mid \epsilon \sim \mathcal{N}(0, \sigma^2)))   \\ &amp; = \mathcal{N}(y - f_\theta(x); 0, \sigma^2) \\ &amp; = \frac{1}{\sqrt{2\pi\sigma^2}} e^{-\frac{(y-f_\theta(x)^2}{2\sigma^2}}
+\end{align}</p>
+
+<p>The math will be less complicated if we use log probability, so let’s switch to that here:</p>
+
+<p>\begin{align}
+\log P((x, y) \in \mathcal{D} \mid \theta) &amp; = 
+\log \frac{1}{\sqrt{2\pi\sigma^2}} e^{-\frac{(y-f_\theta(x)) ^2}{2\sigma^2}} \\ &amp; = -\frac{(y-f_\theta(x)) ^2}{2\sigma^2} + const.
+\end{align}</p>
+
+<p>Notice the <script type="math/tex">(y-f_\theta(x))^2</script> term above – that’s how we’re going to get the <script type="math/tex">\ell_2</script> loss. (Where did it come from? Could we have gotten something else there?)</p>
+
+<p>Now we can extend this from the log probability of a data point to the log probability of the entire dataset. This requires us to assume that each data point is independently sampled, commonly called the <strong>i.i.d. assumption</strong>.</p>
+
+<p>\begin{align}
+\log P(\mathcal{D} \mid \theta) &amp; = 
+\sum \log P(y_i=f_\theta(x_i) + \epsilon \mid \epsilon \sim \mathcal{N}(0, \sigma^2))) \\ &amp; = -\frac{1}{2\sigma^2} \sum_{x, y \in \mathcal{D}} (y - f_\theta(x))^2 + const.
+\end{align}</p>
+
+<p>That’s a simple formula for the probability of our data given our parameters. However, what we really want is to maximize the probability of the parameters given the data, i.e. <script type="math/tex">P(\theta \mid \mathcal{D})</script>.</p>
+
+<h2 id="minimizing-mse-is-maximizing-probability">Minimizing MSE <strong>is</strong> maximizing probability</h2>
+
+<p>We turn to Bayes’ rule, <script type="math/tex">P(\theta \mid \mathcal{D}) \propto P(\mathcal{D} \mid \theta) P(\theta)</script>, and find that:</p>
+
+<p>\begin{align}
+    \log P(\theta \mid \mathcal{D}) &amp; =  \log P(\mathcal{D} \mid \theta) + \log P(\theta) + const. \\     &amp; = \left[ -\frac{1}{2\sigma^2} \sum_{x, y \in \mathcal{D}} (y - f_\theta(x))^2  \right] + \log P(\theta) + const.
+\end{align}</p>
+
+<p>The term in the left-hand side logarithm, <script type="math/tex">P(\theta \mid \mathcal{D})</script>, is called the <strong>posterior distribution</strong>. The two non-constant right-hand side terms also have names: <script type="math/tex">P(\mathcal{D} \mid \theta)</script> is the <strong>likelihood</strong>, and <script type="math/tex">P(\theta)</script> is the <strong>prior distribution</strong> (the likelihood does not integrate to 1, so it’s not a distribution). The prior is a distribution we have to choose based on assumptions outside of our data. Let’s start with the simplest – the so-called <strong>uninformative prior</strong> <script type="math/tex">P(\theta) \propto 1</script>, which doesn’t describe a real probability distribution but still lets us compute the posterior.
+Choosing an uninformative prior corresponds to making no judgement about which parameters are more likely. If we choose the uninformative prior, we get:</p>
+
+<p>\begin{align}
+   \log P(\theta \mid \mathcal{D}) &amp; =  \log P(\mathcal{D} \mid \theta) + \log P(\theta) + const. \\    &amp; = -\frac{1}{2\sigma^2} \sum_{x, y \in \mathcal{D}} (y - f_\theta(x))^2  + const.
+\end{align}</p>
+
+<p>Ok woah. We’re there. Maximizing <script type="math/tex">P(\theta \mid \mathcal{D})</script> is the same as minimizing <script type="math/tex">\sum (y_i - f_\theta(x_i))^2</script>. The formal way of saying this is that minimizing mean squared error maximizes the <strong>likelihood</strong> of the parameters. In short, we’ve found the <strong>maximum likelihood estimator</strong> (MLE).</p>
+
+<h2 id="if-we-change-our-assumptions-though">If we change our assumptions, though…</h2>
+
+<p>We can also change our assumptions and see what happens:</p>
+
+<ol>
+  <li>What if we change the variance on the noise? The log posterior which we’re maximizing changes by a constant factor, so the same model is most likely. We only needed to assume that the noise is drawn from <strong>some</strong> zero-mean Gaussian. (The variance matters if we place a prior as in (3) below)</li>
+  <li>If we assume a different type of noise distribution, we’d derive a different loss function. For example, if we model the noise as being drawn from a Laplace distribution, we’d end up with <script type="math/tex">\ell_1</script> error instead.</li>
+  <li>If we actually place a prior on our parameters we’d get a regularization term added to the log posterior that we’re maximizing. For example, if the prior is a zero-mean Gaussian, we’d get <script type="math/tex">\ell_2</script> regularization. And if the prior is a zero-mean Laplacian, we’d get <script type="math/tex">\ell_1</script> regularization. When we set a prior, we call the most likely parameters the <strong>maximum a posteriori estimate</strong> (MAP).</li>
+  <li>What if our models have different types of parameters, such as the layers in a neural network? We would still want to place a prior on them to avoid overfitting, but we’d want a different prior for different layers. This corresponds to choosing different regularization hyperparameters for each layer.</li>
+</ol>
+
+<p>But don’t believe me – derive these yourself!</p>
+
+
+
+      <a class="share" href="https://twitter.com/intent/tweet?text=&quot;Why Mean Squared Error and L2 regularization? A probabilistic justification.&quot;%20http://avital.github.io/why-mse%20via%20&#64;avitaloliver" data-dnt="true">Share</a>
+      <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+
+      
+      <aside class="disqus">
+        <div id="disqus_thread"></div>
+        <script>
+
+          /**
+          *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+          *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables*/
+          /*
+          var disqus_config = function () {
+          this.page.url = "http://aoliver.org/why-mse"; // <--- use canonical URL
+          this.page.identifier = "/why-mse";
+          };
+          */
+          (function() { // DON'T EDIT BELOW THIS LINE
+          var d = document, s = d.createElement('script');
+          s.src = 'https://aoliver-org.disqus.com/embed.js';
+          s.setAttribute('data-timestamp', +new Date());
+          (d.head || d.body).appendChild(s);
+          })();
+        </script>
+        <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+      </aside>
+      
+
+
+      </article>
+
+    </section>
+</div>
+
+<div class="push"></div>
+  <footer>
+    <aside class="wrap">
+      <ol class="prev-posts">
+        <p class="list-title">Recent Posts</p>
+         <!-- for1 -->
+            <li>
+              <span class="recent-title"><a href="http://localhost:4000/why-mse" title="Why Mean Squared Error and L2 regularization? A probabilistic justification.">Why Mean Squared Error and ... </a></span>
+              <span class="date">Mar 20, 2017</span>
+            </li>
+        
+      </ol>
+
+      <div class="social">
+        <ul>
+            <li><a id="mail" href="mailto:avital@aoliver.org"><span class="foot-link">Contact Me</span></a></li>
+
+            
+            <li><a id="twit" href="http://twitter.com/avitaloliver" target="_blank"><span class="foot-link">@avitaloliver</span></a></li>
+            
+
+
+            
+        </ul>
+    </div>
+    </aside>
+    <small>&copy; 2017 Avital Oliver. Powered by <a href="http://jekyllrb.com">Jekyll</a> using a modified version of the <a href="http://jekyll.gtat.me/about">Balzac</a> theme.</small>
+  </footer>
+
+  <!-- If they're out, get some from the cellar -->
+  <script>window.jQuery || document.write('<script src="http://localhost:4000/assets/js/vendor/jquery-1.9.1.min.js"><\/script>')</script>
+  <script src="http://localhost:4000/assets/js/retina.min.js"></script>
+
+  <!-- Custom JS -->
+  <script src="http://localhost:4000/assets/js/scripts.js"></script>
+
+
+  </body>
+</html>
+
