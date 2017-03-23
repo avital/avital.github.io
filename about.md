@@ -11,6 +11,8 @@ work on them or learn about them.
 
 ### About me
 
+I'm currently contracting for OpenAI doing research and engineering.
+
 I spent most of my early years studying and teaching mathematics,
 culminating in an [M.Sc. in mathematics](http://www.sciencedirect.com/science/article/pii/S0021869304001863), a year as a visiting student at Rutgers, and founding an [informal school of mathematics](http://thewe.net/math).
 
