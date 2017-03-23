@@ -16,7 +16,7 @@ culminating in an [M.Sc. in mathematics](http://www.sciencedirect.com/science/ar
 
 I've also been a professional software engineer, on and off, for almost two
 decades. Most recently, I was a very early employee at
-[Meteor](https://meteor.com) (complete open-source javascript platform, over 35k github stars)
+[Meteor](https://meteor.com) (complete open-source javascript platform, over 35k stars on GitHub)
 and [Asana](https://asana.com/company) (real-time
 collaborative productivity software).
 
