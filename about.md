@@ -33,11 +33,6 @@ foundations.
   a reading and discussion club. Inspired by the book ["Sapiens: A Brief History of Humankind"](https://www.amazon.com/Sapiens-Humankind-Yuval-Noah-Harari/dp/0062316095) (you should read it), we
   discussed chapters from books ranging from history, anthropology, psychology,
   economics and more.
-* I wrote [TeX THE WORLD](http://thewe.net/tex), a browser plugin to render TeX everywhere
-* I worked on [ShiftSpace](http://web.archive.org/web/20110628211734/http://www.shiftspace.org/),
-  an open-source annotation layer on top of any website.
+* I built [TeX THE WORLD](http://thewe.net/tex), a browser plugin to render TeX everywhere
 
-<font size="2">
-Title image: &quot;<a href='https://www.flickr.com/photos/timetrax/376152628/' target='_blank'>library books</a>&quot;&nbsp;(<a rel='license' href='https://creativecommons.org/licenses/by-sa/2.0/' target='_blank'>CC BY-SA 2.0</a>)&nbsp;by&nbsp;<a xmlns:cc='http://creativecommons.org/ns#' rel='cc:attributionURL' property='cc:attributionName' href='https://www.flickr.com/people/timetrax/' target='_blank'>timetrax23</a>
-</font>
 
