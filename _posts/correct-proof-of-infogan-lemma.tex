@@ -1,0 +1,54 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage[colorlinks=true]{hyperref}
+\usepackage{color}
+
+\usepackage{amsthm}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+
+\title{A correct proof of Lemma 5.1 from InfoGAN
+% \footnote{Read and comment on the latest version of this note at \url{http://aoliver.org/correct-infogan-proof}}
+}
+\author{Nic Ford\footnote{\url{http://nicf.net}} \cr Avital Oliver\footnote{\url{http://aoliver.org}}}
+\date{May 2018}
+
+\begin{document}
+
+\maketitle
+
+The InfoGAN paper\footnote{\url{https://arxiv.org/pdf/1606.03657.pdf}} has the following lemma:
+
+\setcounter{section}{5}
+
+\begin{lemma}
+For random variables $X, Y$ and function $f(x, y)$ under suitable regularity conditions:
+$\mathbb{E}_{x \sim X, y \sim Y|x}[f(x, y)] = 
+ \mathbb{E}_{x \sim X, y \sim Y|x, x' \sim X|y}[f(x, y)]$.
+\end{lemma}
+
+The proof in the paper seems wrong -- here's a step where $x$ mysteriously becomes $x'$:
+
+\begin{align*}
+& \int_x \int_y P(x,y) {\color{red} f(x,y)} \int_{x'} P(x' | y)dx'dydx \\
+= & \int_x P(x) \int_y P(y|x) \int_{x'} P(x'|y) {\color{red} f(x',y)} dx' dy dx
+\end{align*}
+
+After consulting with others, we couldn't fix this proof. Instead, Nic Ford found the following proof:
+
+\begin{proof}
+\begin{align*}
+   & \mathbb{E}_{x \sim X,y \sim Y|x}[f(x, y)] = & \mbox{make expectations explicit...} \\
+   & \mathbb{E}_{x \sim P(X)}\big[\mathbb{E}_{y \sim P(Y|X=x)}[f(x, y)]\big] = & \mbox{by definition of $P(Y|X=x)$...} \\
+   & \mathbb{E}_{x,y \sim P(X,Y)}[f(x, y)] = & \mbox{by definition of $P(X|Y=y)$... ...} \\
+   & \mathbb{E}_{y \sim P(Y)}\big[\mathbb{E}_{x \sim P(X|Y=y)}[f(x, y)]\big] = & \mbox{rename $x$ to $x'$...} \\
+   & \mathbb{E}_{y \sim P(Y)}\big[\mathbb{E}_{x' \sim P(X|Y=y)}[f(x', y)]\big] = & \mbox{by the law of total expectation...} \\
+   & \mathbb{E}_{x \sim P(X)}\Big[\mathbb{E}_{y \sim P(Y|X=x)}\big[\mathbb{E}_{x' \sim P(X|Y=y)}[f(x', y)]\big]\Big] = &  \mbox{make expectations implicit...} \\
+   & \mathbb{E}_{x \sim X,y \sim Y|x,x' \sim X|y}[f(x', y)] & \\
+\end{align*}
+\end{proof}
+
+
+\end{document}
