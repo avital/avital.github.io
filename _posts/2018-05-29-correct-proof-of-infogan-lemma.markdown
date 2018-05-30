@@ -28,7 +28,9 @@ $$
 \end{align*}
 $$
 
-After consulting with others, we weren't able to understand that step of the proof. Instead, Nic Ford found this alternative proof. Hopefully this could help others reading the paper.
+After consulting with others, we weren't able to understand that step of the proof. Instead,
+[Nic Ford](http://nicf.net)
+found this alternative proof. Hopefully this could help others reading the paper.
 
 Proof.
 
