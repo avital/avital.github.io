@@ -3,26 +3,26 @@
 <title type="text">Avital Oliver</title>
 <subtitle type="text">Tagline.</subtitle>
 <generator uri="https://github.com/mojombo/jekyll">Jekyll</generator>
-<link rel="self" type="application/atom+xml" href="http://localhost:4000/feed.xml" />
-<link rel="alternate" type="text/html" href="http://localhost:4000" />
-<updated>2018-05-29T17:03:09-07:00</updated>
-<id>http://localhost:4000/</id>
+<link rel="self" type="application/atom+xml" href="/feed.xml" />
+<link rel="alternate" type="text/html" href="" />
+<updated>2018-05-29T17:05:43-07:00</updated>
+<id>/</id>
 <author>
   <name>Avital Oliver</name>
-  <uri>http://localhost:4000/</uri>
+  <uri>/</uri>
   <email>avital@aoliver.org</email>
 </author>
 
 
 <entry>
   <title type="html"><![CDATA[A correct proof of a lemma from the InfoGAN paper]]></title>
-  <link rel="alternate" type="text/html" href="http://localhost:4000/correct-proof-of-infogan-lemma" />
-  <id>http://localhost:4000/correct-proof-of-infogan-lemma</id>
+  <link rel="alternate" type="text/html" href="/correct-proof-of-infogan-lemma" />
+  <id>/correct-proof-of-infogan-lemma</id>
   <published>2018-05-29T06:53:58-07:00</published>
   <updated>2018-05-29T06:53:58-07:00</updated>
   <author>
     <name>Avital Oliver</name>
-    <uri>http://localhost:4000</uri>
+    <uri></uri>
     <email>avital@aoliver.org</email>
   </author>
   <content type="html">&lt;p&gt;The &lt;a href=&quot;https://arxiv.org/pdf/1606.03657.pdf&quot;&gt;InfoGAN paper&lt;/a&gt; has the following lemma:&lt;/p&gt;
@@ -58,19 +58,19 @@ For random variables &lt;script type=&quot;math/tex&quot;&gt;X, Y&lt;/script&gt;
 &lt;p&gt;(This note is also available as a &lt;a href=&quot;/assets/correct-proof-of-infogan-lemma.pdf&quot;&gt;PDF&lt;/a&gt;.)&lt;/p&gt;
 
 
-  &lt;p&gt;&lt;a href=&quot;http://localhost:4000/correct-proof-of-infogan-lemma&quot;&gt;A correct proof of a lemma from the InfoGAN paper&lt;/a&gt; was originally published by Avital Oliver at &lt;a href=&quot;http://localhost:4000&quot;&gt;Avital Oliver&lt;/a&gt; on May 29, 2018.&lt;/p&gt;</content>
+  &lt;p&gt;&lt;a href=&quot;/correct-proof-of-infogan-lemma&quot;&gt;A correct proof of a lemma from the InfoGAN paper&lt;/a&gt; was originally published by Avital Oliver at &lt;a href=&quot;&quot;&gt;Avital Oliver&lt;/a&gt; on May 29, 2018.&lt;/p&gt;</content>
 </entry>
 
 
 <entry>
   <title type="html"><![CDATA[Why Mean Squared Error and L2 regularization? A probabilistic justification.]]></title>
-  <link rel="alternate" type="text/html" href="http://localhost:4000/why-mse" />
-  <id>http://localhost:4000/why-mse</id>
+  <link rel="alternate" type="text/html" href="/why-mse" />
+  <id>/why-mse</id>
   <published>2017-03-20T11:27:31-07:00</published>
   <updated>2017-03-20T11:27:31-07:00</updated>
   <author>
     <name>Avital Oliver</name>
-    <uri>http://localhost:4000</uri>
+    <uri></uri>
     <email>avital@aoliver.org</email>
   </author>
   <content type="html">&lt;p&gt;When you solve a regression problem with gradient descent, you’re
@@ -166,7 +166,7 @@ Choosing an uninformative prior corresponds to making no judgement about which p
 &lt;p&gt;But don’t believe me – derive these yourself!&lt;/p&gt;
 
 
-  &lt;p&gt;&lt;a href=&quot;http://localhost:4000/why-mse&quot;&gt;Why Mean Squared Error and L2 regularization? A probabilistic justification.&lt;/a&gt; was originally published by Avital Oliver at &lt;a href=&quot;http://localhost:4000&quot;&gt;Avital Oliver&lt;/a&gt; on March 20, 2017.&lt;/p&gt;</content>
+  &lt;p&gt;&lt;a href=&quot;/why-mse&quot;&gt;Why Mean Squared Error and L2 regularization? A probabilistic justification.&lt;/a&gt; was originally published by Avital Oliver at &lt;a href=&quot;&quot;&gt;Avital Oliver&lt;/a&gt; on March 20, 2017.&lt;/p&gt;</content>
 </entry>
 
 </feed>
