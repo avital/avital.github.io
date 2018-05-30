@@ -9,34 +9,47 @@
 \newtheorem{theorem}{Theorem}[section]
 \newtheorem{lemma}[theorem]{Lemma}
 
-\title{A correct proof of Lemma 5.1 from InfoGAN
-% \footnote{Read and comment on the latest version of this note at \url{http://aoliver.org/correct-infogan-proof}}
+\title{Correcting a proof in the InfoGAN paper\footnote{Read and comment on the latest version of this note at \url{http://aoliver.org/correct-proof-of-infogan-lemma}}
 }
-\author{Nic Ford\footnote{\url{http://nicf.net}} \cr Avital Oliver\footnote{\url{http://aoliver.org}}}
+\author{Nic Ford\footnote{\url{http://nicf.net}} \cr Avital Oliver}
 \date{May 2018}
 
 \begin{document}
 
 \maketitle
 
-The InfoGAN paper\footnote{\url{https://arxiv.org/pdf/1606.03657.pdf}} has the following lemma:
+% MD: ---
+% MD: layout: post
+% MD: comments: true
+% MD: title: "Correcting a proof in the InfoGAN paper"
+% MD: date: 2018-05-29 13:53:58
+% MD: excerpt_separator: <!--more-->
+% MD: ---
 
-\setcounter{section}{5}
+The
+InfoGAN paper\footnote{\url{https://arxiv.org/pdf/1606.03657.pdf}} % NO-MD
+% MD: [InfoGAN paper](https://arxiv.org/pdf/1606.03657.pdf)
+has the following lemma:
 
+\setcounter{section}{5} % NO-MD
+
+% MD: **Lemma 5.1.**
 \begin{lemma}
 For random variables $X, Y$ and function $f(x, y)$ under suitable regularity conditions:
 $\mathbb{E}_{x \sim X, y \sim Y|x}[f(x, y)] = 
- \mathbb{E}_{x \sim X, y \sim Y|x, x' \sim X|y}[f(x, y)]$.
+ \mathbb{E}_{x \sim X, y \sim Y|x, x' \sim X|y}[f(x', y)]$.
 \end{lemma}
 
-The proof in the paper seems wrong -- here's a step where $x$ mysteriously becomes $x'$:
+The statement is correct, but the proof in the paper is confused -- here's a step where $x$ mysteriously becomes $x'$:
+
+% MD: <!--more-->
 
 \begin{align*}
-& \int_x \int_y P(x,y) {\color{red} f(x,y)} \int_{x'} P(x' | y)dx'dydx \\
-= & \int_x P(x) \int_y P(y|x) \int_{x'} P(x'|y) {\color{red} f(x',y)} dx' dy dx
+& \int_x \int_y P(x,y) {\color{red}{f(x,y)}} \int_{x'} P(x' | y)dx'dydx \\
+= & \int_x P(x) \int_y P(y|x) \int_{x'} P(x'|y) {\color{red}{f(x',y)}} dx' dy dx
 \end{align*}
 
-After consulting with others, we couldn't fix this proof. Instead, Nic Ford found the following proof:
+After consulting with others, we weren't able to fix that step of the proof. Instead, Nic Ford found this alternative proof. Hopefully this could help others reading the paper.
 
 \begin{proof}
 \begin{align*}
@@ -49,6 +62,9 @@ After consulting with others, we couldn't fix this proof. Instead, Nic Ford foun
    & \mathbb{E}_{x \sim X,y \sim Y|x,x' \sim X|y}[f(x', y)] & \\
 \end{align*}
 \end{proof}
+
+% MD-pdf-link
+
 
 
 \end{document}

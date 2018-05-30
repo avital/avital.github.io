@@ -5,7 +5,7 @@
 <generator uri="https://github.com/mojombo/jekyll">Jekyll</generator>
 <link rel="self" type="application/atom+xml" href="http://localhost:4000/feed.xml" />
 <link rel="alternate" type="text/html" href="http://localhost:4000" />
-<updated>2018-05-29T17:17:38-07:00</updated>
+<updated>2018-05-29T19:31:01-07:00</updated>
 <id>http://localhost:4000/</id>
 <author>
   <name>Avital Oliver</name>
@@ -15,7 +15,7 @@
 
 
 <entry>
-  <title type="html"><![CDATA[A correct proof of a lemma from the InfoGAN paper]]></title>
+  <title type="html"><![CDATA[Correcting a proof in the InfoGAN paper]]></title>
   <link rel="alternate" type="text/html" href="http://localhost:4000/correct-proof-of-infogan-lemma" />
   <id>http://localhost:4000/correct-proof-of-infogan-lemma</id>
   <published>2018-05-29T06:53:58-07:00</published>
@@ -25,14 +25,16 @@
     <uri>http://localhost:4000</uri>
     <email>avital@aoliver.org</email>
   </author>
-  <content type="html">&lt;p&gt;The &lt;a href=&quot;https://arxiv.org/pdf/1606.03657.pdf&quot;&gt;InfoGAN paper&lt;/a&gt; has the following lemma:&lt;/p&gt;
+  <content type="html">&lt;p&gt;The
+&lt;a href=&quot;https://arxiv.org/pdf/1606.03657.pdf&quot;&gt;InfoGAN paper&lt;/a&gt;
+has the following lemma:&lt;/p&gt;
 
 &lt;p&gt;&lt;strong&gt;Lemma 5.1.&lt;/strong&gt;
 For random variables &lt;script type=&quot;math/tex&quot;&gt;X, Y&lt;/script&gt; and function &lt;script type=&quot;math/tex&quot;&gt;f(x, y)&lt;/script&gt; under suitable regularity conditions:
 &lt;script type=&quot;math/tex&quot;&gt;\mathbb{E}_{x \sim X, y \sim Y|x}[f(x, y)] = 
- \mathbb{E}_{x \sim X, y \sim Y|x, x' \sim X|y}[f(x, y)]&lt;/script&gt;.&lt;/p&gt;
+ \mathbb{E}_{x \sim X, y \sim Y|x, x' \sim X|y}[f(x', y)]&lt;/script&gt;.&lt;/p&gt;
 
-&lt;p&gt;The proof in the paper seems wrong – here’s a step where &lt;script type=&quot;math/tex&quot;&gt;x&lt;/script&gt; mysteriously becomes &lt;script type=&quot;math/tex&quot;&gt;x'&lt;/script&gt;:&lt;/p&gt;
+&lt;p&gt;The statement is correct, but the proof in the paper is confused – here’s a step where &lt;script type=&quot;math/tex&quot;&gt;x&lt;/script&gt; mysteriously becomes &lt;script type=&quot;math/tex&quot;&gt;x'&lt;/script&gt;:&lt;/p&gt;
 
 &lt;!--more--&gt;
 
@@ -42,7 +44,9 @@ For random variables &lt;script type=&quot;math/tex&quot;&gt;X, Y&lt;/script&gt;
 = &amp; \int_x P(x) \int_y P(y|x) \int_{x'} P(x'|y) {\color{red}{f(x',y)}} dx' dy dx
 \end{align*} %]]&gt;&lt;/script&gt;
 
-&lt;p&gt;After consulting with others, we couldn’t fix this proof. Instead, &lt;a href=&quot;http://nicf.net&quot;&gt;Nic Ford&lt;/a&gt; found the following proof:&lt;/p&gt;
+&lt;p&gt;After consulting with others, we weren’t able to fix that step of the proof. Instead, Nic Ford found this alternative proof. Hopefully this could help others reading the paper.&lt;/p&gt;
+
+&lt;p&gt;Proof.&lt;/p&gt;
 
 &lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
 \begin{align*}
@@ -52,13 +56,12 @@ For random variables &lt;script type=&quot;math/tex&quot;&gt;X, Y&lt;/script&gt;
    &amp; \mathbb{E}_{y \sim P(Y)}\big[\mathbb{E}_{x \sim P(X|Y=y)}[f(x, y)]\big] = &amp; \mbox{rename $x$ to $x'$...} \\
    &amp; \mathbb{E}_{y \sim P(Y)}\big[\mathbb{E}_{x' \sim P(X|Y=y)}[f(x', y)]\big] = &amp; \mbox{by the law of total expectation...} \\
    &amp; \mathbb{E}_{x \sim P(X)}\Big[\mathbb{E}_{y \sim P(Y|X=x)}\big[\mathbb{E}_{x' \sim P(X|Y=y)}[f(x', y)]\big]\Big] = &amp;  \mbox{make expectations implicit...} \\
-   &amp; \mathbb{E}_{x \sim X,y \sim Y|x,x' \sim X|y}[f(x', y)] &amp; □ \\
+   &amp; \mathbb{E}_{x \sim X,y \sim Y|x,x' \sim X|y}[f(x', y)] &amp; \\
 \end{align*} %]]&gt;&lt;/script&gt;
 
 &lt;p&gt;(This note is also available as a &lt;a href=&quot;/assets/correct-proof-of-infogan-lemma.pdf&quot;&gt;PDF&lt;/a&gt;.)&lt;/p&gt;
 
-
-  &lt;p&gt;&lt;a href=&quot;http://localhost:4000/correct-proof-of-infogan-lemma&quot;&gt;A correct proof of a lemma from the InfoGAN paper&lt;/a&gt; was originally published by Avital Oliver at &lt;a href=&quot;http://localhost:4000&quot;&gt;Avital Oliver&lt;/a&gt; on May 29, 2018.&lt;/p&gt;</content>
+  &lt;p&gt;&lt;a href=&quot;http://localhost:4000/correct-proof-of-infogan-lemma&quot;&gt;Correcting a proof in the InfoGAN paper&lt;/a&gt; was originally published by Avital Oliver at &lt;a href=&quot;http://localhost:4000&quot;&gt;Avital Oliver&lt;/a&gt; on May 29, 2018.&lt;/p&gt;</content>
 </entry>
 
 

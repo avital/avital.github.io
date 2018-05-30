@@ -1,21 +1,23 @@
 ---
 layout: post
 comments: true
-title: "A correct proof of a lemma from the InfoGAN paper"
+title: "Correcting a proof in the InfoGAN paper"
 date: 2018-05-29 13:53:58
 excerpt_separator: <!--more-->
-author: AvitalFoo
 ---
 
+The
+[InfoGAN paper](https://arxiv.org/pdf/1606.03657.pdf)
+has the following lemma:
 
-The [InfoGAN paper](https://arxiv.org/pdf/1606.03657.pdf) has the following lemma:
 
 **Lemma 5.1.**
 For random variables $$X, Y$$ and function $$f(x, y)$$ under suitable regularity conditions:
 $$\mathbb{E}_{x \sim X, y \sim Y|x}[f(x, y)] = 
- \mathbb{E}_{x \sim X, y \sim Y|x, x' \sim X|y}[f(x, y)]$$.
+ \mathbb{E}_{x \sim X, y \sim Y|x, x' \sim X|y}[f(x', y)]$$.
 
-The proof in the paper seems wrong -- here's a step where $$x$$ mysteriously becomes $$x'$$:
+
+The statement is correct, but the proof in the paper is confused -- here's a step where $$x$$ mysteriously becomes $$x'$$:
 
 <!--more-->
 
@@ -26,7 +28,9 @@ $$
 \end{align*}
 $$
 
-After consulting with others, we couldn't fix this proof. Instead, [Nic Ford](http://nicf.net) found the following proof:
+After consulting with others, we weren't able to fix that step of the proof. Instead, Nic Ford found this alternative proof. Hopefully this could help others reading the paper.
+
+Proof.
 
 $$
 \begin{align*}
@@ -36,15 +40,9 @@ $$
    & \mathbb{E}_{y \sim P(Y)}\big[\mathbb{E}_{x \sim P(X|Y=y)}[f(x, y)]\big] = & \mbox{rename $x$ to $x'$...} \\
    & \mathbb{E}_{y \sim P(Y)}\big[\mathbb{E}_{x' \sim P(X|Y=y)}[f(x', y)]\big] = & \mbox{by the law of total expectation...} \\
    & \mathbb{E}_{x \sim P(X)}\Big[\mathbb{E}_{y \sim P(Y|X=x)}\big[\mathbb{E}_{x' \sim P(X|Y=y)}[f(x', y)]\big]\Big] = &  \mbox{make expectations implicit...} \\
-   & \mathbb{E}_{x \sim X,y \sim Y|x,x' \sim X|y}[f(x', y)] & □ \\
+   & \mathbb{E}_{x \sim X,y \sim Y|x,x' \sim X|y}[f(x', y)] & \\
 \end{align*}
 $$
 
 
 (This note is also available as a [PDF](/assets/correct-proof-of-infogan-lemma.pdf).)
-
-
-
-
-
-
