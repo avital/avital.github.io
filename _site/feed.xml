@@ -5,7 +5,7 @@
 <generator uri="https://github.com/mojombo/jekyll">Jekyll</generator>
 <link rel="self" type="application/atom+xml" href="http://localhost:4000/feed.xml" />
 <link rel="alternate" type="text/html" href="http://localhost:4000" />
-<updated>2018-05-29T17:11:35-07:00</updated>
+<updated>2018-05-29T17:17:38-07:00</updated>
 <id>http://localhost:4000/</id>
 <author>
   <name>Avital Oliver</name>
@@ -27,7 +27,7 @@
   </author>
   <content type="html">&lt;p&gt;The &lt;a href=&quot;https://arxiv.org/pdf/1606.03657.pdf&quot;&gt;InfoGAN paper&lt;/a&gt; has the following lemma:&lt;/p&gt;
 
-&lt;p&gt;&lt;strong&gt;Lemma 5.1&lt;/strong&gt;
+&lt;p&gt;&lt;strong&gt;Lemma 5.1.&lt;/strong&gt;
 For random variables &lt;script type=&quot;math/tex&quot;&gt;X, Y&lt;/script&gt; and function &lt;script type=&quot;math/tex&quot;&gt;f(x, y)&lt;/script&gt; under suitable regularity conditions:
 &lt;script type=&quot;math/tex&quot;&gt;\mathbb{E}_{x \sim X, y \sim Y|x}[f(x, y)] = 
  \mathbb{E}_{x \sim X, y \sim Y|x, x' \sim X|y}[f(x, y)]&lt;/script&gt;.&lt;/p&gt;
@@ -52,7 +52,7 @@ For random variables &lt;script type=&quot;math/tex&quot;&gt;X, Y&lt;/script&gt;
    &amp; \mathbb{E}_{y \sim P(Y)}\big[\mathbb{E}_{x \sim P(X|Y=y)}[f(x, y)]\big] = &amp; \mbox{rename $x$ to $x'$...} \\
    &amp; \mathbb{E}_{y \sim P(Y)}\big[\mathbb{E}_{x' \sim P(X|Y=y)}[f(x', y)]\big] = &amp; \mbox{by the law of total expectation...} \\
    &amp; \mathbb{E}_{x \sim P(X)}\Big[\mathbb{E}_{y \sim P(Y|X=x)}\big[\mathbb{E}_{x' \sim P(X|Y=y)}[f(x', y)]\big]\Big] = &amp;  \mbox{make expectations implicit...} \\
-   &amp; \mathbb{E}_{x \sim X,y \sim Y|x,x' \sim X|y}[f(x', y)] &amp; \\
+   &amp; \mathbb{E}_{x \sim X,y \sim Y|x,x' \sim X|y}[f(x', y)] &amp; □ \\
 \end{align*} %]]&gt;&lt;/script&gt;
 
 &lt;p&gt;(This note is also available as a &lt;a href=&quot;/assets/correct-proof-of-infogan-lemma.pdf&quot;&gt;PDF&lt;/a&gt;.)&lt;/p&gt;
