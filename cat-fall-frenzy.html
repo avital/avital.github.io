@@ -1,0 +1,1024 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cat Bounce Bash</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Fredoka", "Trebuchet MS", sans-serif;
+      background: radial-gradient(circle at top, #1f1630, #05030f);
+      color: #f5f1ff;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    header {
+      padding: 1.4rem 2rem 0.5rem;
+      text-align: center;
+    }
+
+    header h1 {
+      margin: 0;
+      letter-spacing: 0.05em;
+      font-size: clamp(2rem, 4vw, 3.5rem);
+      color: #ffc857;
+      text-shadow: 0 4px 10px rgba(0, 0, 0, 0.45);
+    }
+
+    header p {
+      margin: 0.4rem auto 0;
+      max-width: 680px;
+      color: #d8cff7;
+      line-height: 1.5;
+    }
+
+    #game-wrapper {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem 0 2rem;
+    }
+
+    #game-container {
+      position: relative;
+      width: min(960px, 95vw);
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+      background: linear-gradient(180deg, rgba(4, 7, 25, 0.95), rgba(19, 20, 45, 0.95));
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: auto;
+      background: linear-gradient(#201640, #0b0325 60%, #0b0325 100%);
+    }
+
+    .hud {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      padding: 1rem 1.4rem;
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.95rem;
+      pointer-events: none;
+    }
+
+    .hud .panel {
+      background: rgba(12, 7, 32, 0.55);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 12px;
+      padding: 0.8rem 1rem;
+      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.3);
+      backdrop-filter: blur(4px);
+      max-width: 320px;
+    }
+
+    .hud ul {
+      margin: 0.4rem 0 0;
+      padding-left: 1.2rem;
+      line-height: 1.4;
+    }
+
+    .dance-meter {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      margin-top: 0.5rem;
+    }
+
+    .meter-bar {
+      flex: 1;
+      height: 10px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.1);
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+    }
+
+    .meter-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #ff00d4, #ffce00);
+    }
+
+    #dance-callout {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(13, 6, 45, 0.85);
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      padding: 1.4rem 2.4rem;
+      border-radius: 16px;
+      text-align: center;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+      display: none;
+      pointer-events: none;
+    }
+
+    #dance-callout h2 {
+      margin: 0;
+      font-size: 1.6rem;
+      letter-spacing: 0.08em;
+      color: #ff9bf4;
+      text-shadow: 0 0 12px rgba(255, 73, 206, 0.7);
+    }
+
+    #dance-key {
+      margin-top: 1rem;
+      font-size: 3rem;
+      color: #ffe663;
+      text-shadow: 0 0 15px rgba(255, 230, 99, 0.8);
+    }
+
+    .footer-note {
+      text-align: center;
+      font-size: 0.85rem;
+      color: rgba(214, 208, 255, 0.55);
+      padding: 0.5rem 0 1.5rem;
+    }
+
+    @media (max-width: 640px) {
+      .hud {
+        flex-direction: column;
+        gap: 0.6rem;
+      }
+
+      .hud .panel {
+        max-width: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Cat Bounce Bash</h1>
+    <p>
+      Dash, leap, and shimmy your way through a pastel obstacle course starring a fearless feline.
+      Time the jumps over spin sticks, slide under swinging bars, and master the disco dance floor to reach the finish!
+    </p>
+  </header>
+  <div id="game-wrapper">
+    <div id="game-container">
+      <canvas id="game" width="900" height="520" aria-label="Playfield for Cat Bounce Bash"></canvas>
+      <div class="hud" aria-live="polite">
+        <div class="panel">
+          <strong>How to Play</strong>
+          <ul>
+            <li>Move: <kbd>A</kbd>/<kbd>D</kbd> or <kbd>←</kbd>/<kbd>→</kbd></li>
+            <li>Jump: <kbd>W</kbd> / <kbd>↑</kbd> / <kbd>Space</kbd></li>
+            <li>Slide: <kbd>S</kbd> / <kbd>↓</kbd> / <kbd>Shift</kbd></li>
+            <li>Dance: hit the arrow or letter shown inside the Disco Dome!</li>
+          </ul>
+        </div>
+        <div class="panel" id="status-panel">
+          <div>Respawns: <span id="respawn-count">0</span></div>
+          <div class="dance-meter" aria-hidden="true">
+            <span>Groove</span>
+            <div class="meter-bar"><div class="meter-fill" id="dance-meter-fill"></div></div>
+          </div>
+          <div id="objective" style="margin-top:0.5rem; color:#f8f5ff;">Reach the finish banner!</div>
+        </div>
+      </div>
+      <div id="dance-callout">
+        <h2>Disco Move!</h2>
+        <div id="dance-key">⬆</div>
+        <p style="margin-top: 0.6rem; color:#e7dcff; font-size:0.95rem;">Hit the beat before the timer fades.</p>
+      </div>
+    </div>
+  </div>
+  <div class="footer-note">Built with vanilla HTML5 canvas — reload to reset the course.</div>
+  <script>
+    const canvas = document.getElementById('game');
+    const ctx = canvas.getContext('2d');
+    const respawnDisplay = document.getElementById('respawn-count');
+    const danceMeterFill = document.getElementById('dance-meter-fill');
+    const danceCallout = document.getElementById('dance-callout');
+    const danceKeyDisplay = document.getElementById('dance-key');
+    const objectiveDisplay = document.getElementById('objective');
+
+    const world = {
+      gravity: 2200,
+      moveAcceleration: 2000,
+      maxSpeed: 320,
+      jumpVelocity: 880,
+      drag: 0.82,
+      slideDuration: 0.55,
+      slideHeight: 38,
+      normalHeight: 72
+    };
+
+    const keys = new Set();
+
+    const player = {
+      x: 80,
+      y: 360,
+      width: 60,
+      height: world.normalHeight,
+      vx: 0,
+      vy: 0,
+      onGround: false,
+      sliding: false,
+      slideTimer: 0,
+      facing: 1,
+      respawns: 0,
+      checkpoint: { x: 80, y: 360 },
+      danceScore: 0,
+      stunnedTimer: 0
+    };
+
+    const disco = {
+      active: false,
+      hasEntered: false,
+      gateOpened: false,
+      prompt: null,
+      promptTimer: 0,
+      promptCooldown: 0,
+      streak: 0,
+      gateRequirement: 4,
+      beatInterval: 2.4,
+      promptKeys: [
+        { key: 'ArrowUp', label: '⬆' },
+        { key: 'ArrowDown', label: '⬇' },
+        { key: 'ArrowLeft', label: '⬅' },
+        { key: 'ArrowRight', label: '➡' },
+        { key: 'KeyZ', label: 'Z' },
+        { key: 'KeyX', label: 'X' }
+      ]
+    };
+
+    const camera = { x: 0, y: 0 };
+
+    const level = {
+      floorY: 432,
+      finishX: 2420,
+      discoStart: 1660,
+      discoEnd: 2200
+    };
+
+    const platforms = [
+      { x: -400, y: level.floorY, width: 1200, height: 200 },
+      { x: 480, y: level.floorY - 90, width: 140, height: 20 },
+      { x: 700, y: level.floorY - 160, width: 120, height: 20 },
+      { x: 860, y: level.floorY - 90, width: 160, height: 20 },
+      { x: 1160, y: level.floorY - 70, width: 160, height: 20 },
+      { x: 1360, y: level.floorY, width: 340, height: 200 },
+      { x: 1700, y: level.floorY, width: 620, height: 200 },
+      { x: 1960, y: level.floorY - 120, width: 140, height: 20 },
+      { x: 2100, y: level.floorY - 200, width: 120, height: 20 },
+      { x: 2250, y: level.floorY - 110, width: 160, height: 20 },
+      { x: 2240, y: level.floorY, width: 420, height: 200 }
+    ];
+
+    const spinSticks = [
+      { x: 770, y: level.floorY - 30, radius: 22, length: 170, speed: 1.8, angle: 0 },
+      { x: 1040, y: level.floorY - 110, radius: 22, length: 140, speed: -1.3, angle: Math.PI / 3 },
+      { x: 1880, y: level.floorY - 40, radius: 24, length: 160, speed: 2.1, angle: 0 }
+    ];
+
+    const slideBars = [
+      { x: 620, y: level.floorY - 120, width: 200, height: 20 },
+      { x: 1520, y: level.floorY - 120, width: 260, height: 20 }
+    ];
+
+    const discoGate = { x: 2030, y: level.floorY - 170, width: 36, height: 170 };
+
+    const sparkleParticles = [];
+
+    function spawnSparkle(x, y, hue) {
+      sparkleParticles.push({
+        x,
+        y,
+        life: 0.6,
+        size: 6,
+        hue,
+        vx: (Math.random() - 0.5) * 120,
+        vy: -80 - Math.random() * 70
+      });
+    }
+
+    function catCircleCollision(px, py, radius, cx, cy, cradius) {
+      const dx = px - cx;
+      const dy = py - cy;
+      const distSq = dx * dx + dy * dy;
+      const combined = radius + cradius;
+      return distSq <= combined * combined;
+    }
+
+    function drawRoundedRect(ctx, x, y, width, height, radius) {
+      const r = Math.min(radius, width / 2, height / 2);
+      ctx.beginPath();
+      ctx.moveTo(x + r, y);
+      ctx.lineTo(x + width - r, y);
+      ctx.quadraticCurveTo(x + width, y, x + width, y + r);
+      ctx.lineTo(x + width, y + height - r);
+      ctx.quadraticCurveTo(x + width, y + height, x + width - r, y + height);
+      ctx.lineTo(x + r, y + height);
+      ctx.quadraticCurveTo(x, y + height, x, y + height - r);
+      ctx.lineTo(x, y + r);
+      ctx.quadraticCurveTo(x, y, x + r, y);
+      ctx.closePath();
+    }
+
+    function rectanglesIntersect(a, b) {
+      return a.x < b.x + b.width &&
+        a.x + a.width > b.x &&
+        a.y < b.y + b.height &&
+        a.y + a.height > b.y;
+    }
+
+    function collidesWithPlatforms(rect, includeGate = true) {
+      for (const platform of platforms) {
+        if (rectanglesIntersect(rect, platform)) {
+          return true;
+        }
+      }
+      if (includeGate && !disco.gateOpened) {
+        if (rectanglesIntersect(rect, discoGate)) {
+          return true;
+        }
+      }
+      return false;
+    }
+
+    function requestSlide() {
+      if (!player.onGround || player.sliding || player.stunnedTimer > 0) return;
+      player.sliding = true;
+      player.slideTimer = world.slideDuration;
+      const delta = player.height - world.slideHeight;
+      player.height = world.slideHeight;
+      player.y += delta;
+      spawnSparkle(player.x + player.width / 2, player.y + player.height, 310 + Math.random() * 40);
+    }
+
+    function endSlide() {
+      if (!player.sliding) return;
+      const proposed = { x: player.x, y: player.y - (world.normalHeight - player.height), width: player.width, height: world.normalHeight };
+      if (!collidesWithPlatforms(proposed)) {
+        player.y = proposed.y;
+        player.height = world.normalHeight;
+        player.sliding = false;
+      } else {
+        // keep sliding until there is room
+        player.slideTimer = 0.1;
+      }
+    }
+
+    function respawn(reason = 'oops') {
+      player.x = player.checkpoint.x;
+      player.y = player.checkpoint.y;
+      player.vx = 0;
+      player.vy = 0;
+      player.sliding = false;
+      player.height = world.normalHeight;
+      player.slideTimer = 0;
+      player.onGround = false;
+      player.stunnedTimer = 0.45;
+      player.respawns += 1;
+      respawnDisplay.textContent = player.respawns;
+      if (reason === 'spin' || reason === 'fall') {
+        objectiveDisplay.textContent = 'Stay light on your paws!';
+        setTimeout(() => {
+          objectiveDisplay.textContent = disco.gateOpened ? 'Rush to the finish banner!' : 'Reach the finish banner!';
+        }, 2200);
+      }
+    }
+
+    function setCheckpoint(x, y) {
+      player.checkpoint = { x, y };
+      spawnSparkle(x + 40, y, 180 + Math.random() * 60);
+      objectiveDisplay.textContent = 'Checkpoint! Keep going!';
+      setTimeout(() => {
+        objectiveDisplay.textContent = disco.gateOpened ? 'Rush to the finish banner!' : 'Reach the finish banner!';
+      }, 2200);
+    }
+
+    function updateSparkles(dt) {
+      for (let i = sparkleParticles.length - 1; i >= 0; i--) {
+        const p = sparkleParticles[i];
+        p.life -= dt;
+        if (p.life <= 0) {
+          sparkleParticles.splice(i, 1);
+          continue;
+        }
+        p.x += p.vx * dt;
+        p.y += p.vy * dt;
+        p.vy += 120 * dt;
+      }
+    }
+
+    function drawSparkles(cameraX) {
+      ctx.save();
+      ctx.translate(-cameraX, 0);
+      for (const p of sparkleParticles) {
+        const alpha = Math.max(0, p.life / 0.6);
+        ctx.fillStyle = `hsla(${p.hue}, 90%, 70%, ${alpha})`;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size * alpha, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.restore();
+    }
+
+    function sampleSpinnerArm(armX, armY, toX, toY, samples) {
+      const points = [];
+      for (let i = 1; i <= samples; i++) {
+        const t = i / (samples + 1);
+        points.push({
+          x: armX + (toX - armX) * t,
+          y: armY + (toY - armY) * t
+        });
+      }
+      return points;
+    }
+
+    function handleSpinStickCollisions() {
+      const playerCenterX = player.x + player.width / 2;
+      const playerCenterY = player.y + player.height / 2;
+      const playerRadius = Math.max(player.width, player.height) * 0.35;
+
+      for (const stick of spinSticks) {
+        const ax = stick.x;
+        const ay = stick.y;
+        const bx = stick.x + Math.cos(stick.angle) * stick.length;
+        const by = stick.y + Math.sin(stick.angle) * stick.length;
+        const cx = stick.x - Math.cos(stick.angle) * stick.length;
+        const cy = stick.y - Math.sin(stick.angle) * stick.length;
+
+        const points = sampleSpinnerArm(ax, ay, bx, by, 3).concat(sampleSpinnerArm(ax, ay, cx, cy, 3));
+        points.push({ x: bx, y: by }, { x: cx, y: cy });
+
+        for (const point of points) {
+          if (catCircleCollision(playerCenterX, playerCenterY, playerRadius, point.x, point.y, stick.radius)) {
+            respawn('spin');
+            return;
+          }
+        }
+      }
+    }
+
+    function updateDisco(dt) {
+      if (!disco.active) return;
+
+      if (!disco.gateOpened && player.danceScore >= disco.gateRequirement) {
+        disco.gateOpened = true;
+        objectiveDisplay.textContent = 'Groove approved! Sprint to the banner!';
+        spawnSparkle(discoGate.x + 10, discoGate.y + 20, 50 + Math.random() * 40);
+      }
+
+      if (disco.prompt) {
+        disco.promptTimer -= dt;
+        if (disco.promptTimer <= 0) {
+          // Missed the beat
+          disco.streak = 0;
+          player.danceScore = Math.max(0, player.danceScore - 1);
+          updateDanceMeter();
+          danceCallout.style.display = 'none';
+          disco.prompt = null;
+          player.stunnedTimer = Math.max(player.stunnedTimer, 0.25);
+          objectiveDisplay.textContent = 'Missed a beat! Try again!';
+          setTimeout(() => {
+            objectiveDisplay.textContent = disco.gateOpened ? 'Groove approved! Sprint to the banner!' : 'Fill the groove meter!';
+          }, 1800);
+        }
+      } else {
+        disco.promptCooldown -= dt;
+        if (disco.promptCooldown <= 0) {
+          const next = disco.promptKeys[Math.floor(Math.random() * disco.promptKeys.length)];
+          disco.prompt = next;
+          disco.promptTimer = 1.9 - Math.min(0.7, disco.streak * 0.12);
+          disco.promptCooldown = disco.beatInterval;
+          danceCallout.style.display = 'block';
+          danceKeyDisplay.textContent = next.label;
+        }
+      }
+    }
+
+    function updateDanceMeter() {
+      const percent = Math.min(1, player.danceScore / disco.gateRequirement) * 100;
+      danceMeterFill.style.width = `${percent}%`;
+    }
+
+    function handleDanceInput(code) {
+      if (!disco.active || !disco.prompt) return;
+      if (code === disco.prompt.key) {
+        disco.streak += 1;
+        player.danceScore = Math.min(disco.gateRequirement, player.danceScore + 1);
+        updateDanceMeter();
+        danceCallout.style.display = 'none';
+        disco.prompt = null;
+        disco.promptCooldown = 0.8;
+        objectiveDisplay.textContent = player.danceScore >= disco.gateRequirement ? 'Groove approved! Sprint to the banner!' : 'Great move! Keep dancing!';
+        spawnSparkle(player.x + player.width / 2, player.y + player.height / 2, 300 + Math.random() * 60);
+      } else {
+        disco.streak = 0;
+        player.danceScore = Math.max(0, player.danceScore - 1);
+        updateDanceMeter();
+        danceCallout.style.display = 'none';
+        disco.prompt = null;
+        disco.promptCooldown = 1.2;
+        player.stunnedTimer = Math.max(player.stunnedTimer, 0.2);
+        objectiveDisplay.textContent = 'Off-beat! Try another move!';
+        setTimeout(() => {
+          objectiveDisplay.textContent = disco.gateOpened ? 'Groove approved! Sprint to the banner!' : 'Fill the groove meter!';
+        }, 1600);
+      }
+    }
+
+    function updateCheckpoints() {
+      if (player.x > 1240 && player.checkpoint.x < 1240) {
+        setCheckpoint(1380, level.floorY - world.normalHeight);
+      }
+      if (player.x > level.discoStart + 40 && player.checkpoint.x < level.discoStart + 40) {
+        setCheckpoint(level.discoStart + 80, level.floorY - world.normalHeight);
+      }
+    }
+
+    let lastTime = 0;
+    function gameLoop(timestamp) {
+      const delta = Math.min(0.032, (timestamp - lastTime) / 1000 || 0);
+      lastTime = timestamp;
+
+      update(delta);
+      draw();
+
+      requestAnimationFrame(gameLoop);
+    }
+
+    function update(dt) {
+      updateSparkles(dt);
+      updateInput(dt);
+      applyPhysics(dt);
+      updateDisco(dt);
+      handleSpinStickCollisions();
+      handleSlideBars();
+      updateCheckpoints();
+
+      if (player.y > canvas.height + 200) {
+        respawn('fall');
+      }
+
+      if (player.x > level.finishX && !victory) {
+        victory = true;
+        objectiveDisplay.textContent = 'Victory! Cat champion crowned!';
+        setTimeout(() => {
+          objectiveDisplay.textContent = 'Reload the page to play again.';
+        }, 5000);
+      }
+    }
+
+    function updateInput(dt) {
+      if (player.stunnedTimer > 0) {
+        player.stunnedTimer = Math.max(0, player.stunnedTimer - dt);
+      }
+
+      const left = keys.has('KeyA') || keys.has('ArrowLeft');
+      const right = keys.has('KeyD') || keys.has('ArrowRight');
+
+      if (left && !right) {
+        player.vx -= world.moveAcceleration * dt;
+        player.facing = -1;
+      } else if (right && !left) {
+        player.vx += world.moveAcceleration * dt;
+        player.facing = 1;
+      } else {
+        player.vx *= player.onGround ? world.drag : 0.99;
+        if (Math.abs(player.vx) < 0.05) player.vx = 0;
+      }
+
+      player.vx = Math.max(-world.maxSpeed, Math.min(world.maxSpeed, player.vx));
+
+      if (player.sliding) {
+        player.slideTimer -= dt;
+        if (player.slideTimer <= 0) {
+          endSlide();
+        }
+      }
+
+      if (player.stunnedTimer > 0) {
+        player.vx *= 0.75;
+      }
+    }
+
+    function applyPhysics(dt) {
+      const twoPi = Math.PI * 2;
+      for (const stick of spinSticks) {
+        stick.angle += stick.speed * dt;
+        if (stick.angle > twoPi) {
+          stick.angle -= twoPi;
+        } else if (stick.angle < -twoPi) {
+          stick.angle += twoPi;
+        }
+      }
+
+      player.vy += world.gravity * dt;
+      if (player.vy > world.jumpVelocity) {
+        player.vy = Math.min(player.vy, world.jumpVelocity * 1.2);
+      }
+
+      let nextX = player.x + player.vx * dt;
+      const horizontalRect = { x: nextX, y: player.y, width: player.width, height: player.height };
+      if (!collidesWithPlatforms(horizontalRect)) {
+        player.x = nextX;
+      } else {
+        if (player.vx > 0) {
+          let minX = player.x;
+          let maxX = player.x + player.vx * dt;
+          while (Math.abs(maxX - minX) > 0.5) {
+            const mid = (minX + maxX) / 2;
+            const testRect = { x: mid, y: player.y, width: player.width, height: player.height };
+            if (!collidesWithPlatforms(testRect)) {
+              minX = mid;
+            } else {
+              maxX = mid;
+            }
+          }
+          player.x = minX;
+        } else if (player.vx < 0) {
+          let minX = player.x + player.vx * dt;
+          let maxX = player.x;
+          while (Math.abs(maxX - minX) > 0.5) {
+            const mid = (minX + maxX) / 2;
+            const testRect = { x: mid, y: player.y, width: player.width, height: player.height };
+            if (!collidesWithPlatforms(testRect)) {
+              maxX = mid;
+            } else {
+              minX = mid;
+            }
+          }
+          player.x = maxX;
+        }
+        player.vx = 0;
+      }
+
+      player.onGround = false;
+      let nextY = player.y + player.vy * dt;
+      const verticalRect = { x: player.x, y: nextY, width: player.width, height: player.height };
+      if (!collidesWithPlatforms(verticalRect)) {
+        player.y = nextY;
+      } else {
+        if (player.vy > 0) {
+          let minY = player.y;
+          let maxY = nextY;
+          while (Math.abs(maxY - minY) > 0.5) {
+            const mid = (minY + maxY) / 2;
+            const testRect = { x: player.x, y: mid, width: player.width, height: player.height };
+            if (!collidesWithPlatforms(testRect)) {
+              minY = mid;
+            } else {
+              maxY = mid;
+            }
+          }
+          player.y = minY;
+          player.vy = 0;
+          player.onGround = true;
+        } else if (player.vy < 0) {
+          let minY = nextY;
+          let maxY = player.y;
+          while (Math.abs(maxY - minY) > 0.5) {
+            const mid = (minY + maxY) / 2;
+            const testRect = { x: player.x, y: mid, width: player.width, height: player.height };
+            if (!collidesWithPlatforms(testRect)) {
+              minY = mid;
+            } else {
+              maxY = mid;
+            }
+          }
+          player.y = maxY;
+          player.vy = 0;
+        }
+      }
+
+      if (!disco.hasEntered && player.x > level.discoStart - 40) {
+        disco.hasEntered = true;
+        disco.active = true;
+        objectiveDisplay.textContent = 'Welcome to the Disco Dome! Fill the groove meter!';
+        spawnSparkle(player.x + 10, player.y - 20, 320);
+      }
+
+      camera.x = Math.max(0, player.x - canvas.width * 0.35);
+      camera.y = 0;
+    }
+
+    function handleSlideBars() {
+      if (player.sliding) return;
+      for (const bar of slideBars) {
+        if (player.x + player.width > bar.x && player.x < bar.x + bar.width) {
+          const barBottom = bar.y + bar.height;
+          if (player.y + 6 < barBottom && player.y + player.height > bar.y - 8) {
+            requestSlide();
+            break;
+          }
+        }
+      }
+    }
+
+    function drawBackground() {
+      const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+      gradient.addColorStop(0, '#28145b');
+      gradient.addColorStop(0.5, '#180b3b');
+      gradient.addColorStop(1, '#080220');
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Decorative stars
+      ctx.save();
+      ctx.translate(-camera.x * 0.5, 0);
+      ctx.fillStyle = 'rgba(255,255,255,0.25)';
+      for (let i = 0; i < 80; i++) {
+        const x = (i * 140 + (performance.now() * 0.02)) % (canvas.width + 600) - 300;
+        const y = (Math.sin(i * 1.2) * 60 + 90 + (i * 7) % canvas.height);
+        ctx.fillRect(x, y, 2, 2);
+      }
+      ctx.restore();
+    }
+
+    function drawPlatforms() {
+      ctx.save();
+      ctx.translate(-camera.x, -camera.y);
+      for (const platform of platforms) {
+        const isDisco = platform.x >= level.discoStart - 60;
+        const top = platform.y;
+        const bottom = platform.y + platform.height;
+        const gradient = ctx.createLinearGradient(0, top, 0, bottom);
+        if (isDisco) {
+          gradient.addColorStop(0, 'rgba(255, 0, 200, 0.8)');
+          gradient.addColorStop(1, 'rgba(130, 34, 255, 0.9)');
+        } else {
+          gradient.addColorStop(0, 'rgba(55, 196, 255, 0.7)');
+          gradient.addColorStop(1, 'rgba(23, 86, 255, 0.9)');
+        }
+        ctx.fillStyle = gradient;
+        ctx.fillRect(platform.x, platform.y, platform.width, platform.height);
+        ctx.fillStyle = isDisco ? 'rgba(255, 255, 255, 0.4)' : 'rgba(255, 255, 255, 0.2)';
+        for (let i = 0; i < platform.width; i += 24) {
+          ctx.fillRect(platform.x + i, platform.y - 6, 16, 6);
+        }
+      }
+
+      if (!disco.gateOpened) {
+        const gradient = ctx.createLinearGradient(0, discoGate.y, 0, discoGate.y + discoGate.height);
+        gradient.addColorStop(0, 'rgba(255, 55, 230, 0.85)');
+        gradient.addColorStop(1, 'rgba(94, 30, 255, 0.95)');
+        ctx.fillStyle = gradient;
+        ctx.fillRect(discoGate.x, discoGate.y, discoGate.width, discoGate.height);
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.55)';
+        ctx.setLineDash([6, 4]);
+        ctx.strokeRect(discoGate.x, discoGate.y, discoGate.width, discoGate.height);
+        ctx.setLineDash([]);
+      }
+
+      ctx.restore();
+    }
+
+    function drawSpinSticks() {
+      ctx.save();
+      ctx.translate(-camera.x, -camera.y);
+      for (const stick of spinSticks) {
+        ctx.save();
+        ctx.translate(stick.x, stick.y);
+        ctx.rotate(stick.angle);
+        const gradient = ctx.createLinearGradient(-stick.length, 0, stick.length, 0);
+        gradient.addColorStop(0, '#ffdd58');
+        gradient.addColorStop(0.5, '#ff3ee3');
+        gradient.addColorStop(1, '#58f0ff');
+        ctx.lineWidth = stick.radius * 1.8;
+        ctx.lineCap = 'round';
+        ctx.strokeStyle = gradient;
+        ctx.beginPath();
+        ctx.moveTo(-stick.length, 0);
+        ctx.lineTo(stick.length, 0);
+        ctx.stroke();
+        ctx.restore();
+      }
+      ctx.restore();
+    }
+
+    function drawSlideBars() {
+      ctx.save();
+      ctx.translate(-camera.x, -camera.y);
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.25)';
+      for (const bar of slideBars) {
+        ctx.fillRect(bar.x, bar.y, bar.width, bar.height);
+      }
+      ctx.restore();
+    }
+
+    function drawFinishFlag() {
+      ctx.save();
+      ctx.translate(-camera.x, -camera.y);
+      const poleX = level.finishX;
+      const baseY = level.floorY - 170;
+      ctx.fillStyle = '#f6f9ff';
+      ctx.fillRect(poleX, baseY, 6, 180);
+      ctx.fillStyle = '#ffdb3b';
+      ctx.beginPath();
+      ctx.moveTo(poleX + 6, baseY + 12);
+      ctx.lineTo(poleX + 6 + 110, baseY + 52);
+      ctx.lineTo(poleX + 6, baseY + 90);
+      ctx.closePath();
+      ctx.fill();
+      ctx.fillStyle = '#7b5bff';
+      ctx.font = 'bold 28px "Fredoka", sans-serif';
+      ctx.fillText('Finish!', poleX + 18, baseY + 60);
+      ctx.restore();
+    }
+
+    function drawPlayer() {
+      ctx.save();
+      ctx.translate(player.x - camera.x + player.width / 2, player.y + player.height / 2 - camera.y);
+      ctx.scale(player.facing, 1);
+      ctx.translate(-player.width / 2, -player.height / 2);
+
+      const bodyHeight = player.height * 0.75;
+      const headHeight = player.height - bodyHeight;
+
+      // Tail
+      ctx.save();
+      ctx.translate(player.width * 0.9, bodyHeight * 0.6);
+      ctx.rotate(Math.sin(performance.now() * 0.002) * 0.25);
+      ctx.fillStyle = '#ffcc66';
+      ctx.beginPath();
+      ctx.ellipse(0, 0, player.height * 0.45, player.height * 0.18, Math.PI / 6, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+
+      // Body
+      const bodyGradient = ctx.createLinearGradient(0, headHeight, 0, player.height);
+      bodyGradient.addColorStop(0, '#ffb347');
+      bodyGradient.addColorStop(1, '#ff8d72');
+      ctx.fillStyle = bodyGradient;
+      drawRoundedRect(ctx, player.width * 0.1, headHeight, player.width * 0.8, bodyHeight, player.height * 0.3);
+      ctx.fill();
+
+      // Head
+      ctx.fillStyle = '#ffd38c';
+      ctx.beginPath();
+      ctx.moveTo(player.width * 0.05, headHeight * 0.4);
+      ctx.lineTo(player.width * 0.25, headHeight * -0.1);
+      ctx.lineTo(player.width * 0.45, headHeight * 0.2);
+      ctx.lineTo(player.width * 0.65, headHeight * -0.1);
+      ctx.lineTo(player.width * 0.85, headHeight * 0.4);
+      ctx.quadraticCurveTo(player.width * 0.9, headHeight * 0.95, player.width * 0.5, headHeight * 1.1);
+      ctx.quadraticCurveTo(player.width * 0.1, headHeight * 0.95, player.width * 0.05, headHeight * 0.4);
+      ctx.fill();
+
+      // Inner ears
+      ctx.fillStyle = '#ff7d8a';
+      ctx.beginPath();
+      ctx.moveTo(player.width * 0.24, headHeight * 0.02);
+      ctx.lineTo(player.width * 0.31, headHeight * -0.05);
+      ctx.lineTo(player.width * 0.38, headHeight * 0.12);
+      ctx.closePath();
+      ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(player.width * 0.62, headHeight * 0.02);
+      ctx.lineTo(player.width * 0.69, headHeight * -0.05);
+      ctx.lineTo(player.width * 0.76, headHeight * 0.12);
+      ctx.closePath();
+      ctx.fill();
+
+      // Face
+      const eyeY = headHeight * 0.6;
+      ctx.fillStyle = '#2f1534';
+      ctx.beginPath();
+      ctx.ellipse(player.width * 0.35, eyeY, player.width * 0.08, player.width * 0.11, 0, 0, Math.PI * 2);
+      ctx.ellipse(player.width * 0.65, eyeY, player.width * 0.08, player.width * 0.11, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Pupils
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(player.width * 0.33, eyeY - 4, 4, 0, Math.PI * 2);
+      ctx.arc(player.width * 0.63, eyeY - 4, 4, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Muzzle
+      ctx.fillStyle = '#ffe7c2';
+      ctx.beginPath();
+      ctx.ellipse(player.width * 0.5, headHeight * 0.92, player.width * 0.24, player.height * 0.12, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#ff7d8a';
+      ctx.beginPath();
+      ctx.arc(player.width * 0.5, headHeight * 0.78, 6, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Mouth
+      ctx.strokeStyle = '#9a4258';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(player.width * 0.5, headHeight * 0.82);
+      ctx.lineTo(player.width * 0.5, headHeight * 0.95);
+      ctx.moveTo(player.width * 0.5, headHeight * 0.95);
+      ctx.bezierCurveTo(player.width * 0.56, headHeight * 1.05, player.width * 0.64, headHeight * 1.04, player.width * 0.66, headHeight * 0.96);
+      ctx.moveTo(player.width * 0.5, headHeight * 0.95);
+      ctx.bezierCurveTo(player.width * 0.44, headHeight * 1.05, player.width * 0.36, headHeight * 1.04, player.width * 0.34, headHeight * 0.96);
+      ctx.stroke();
+
+      // Belly highlight
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+      ctx.beginPath();
+      ctx.ellipse(player.width * 0.52, player.height * 0.78, player.width * 0.18, player.height * 0.26, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.restore();
+    }
+
+    let victory = false;
+
+    function drawDiscoOverlay() {
+      if (!disco.active) return;
+      ctx.save();
+      ctx.globalAlpha = 0.3 + Math.sin(performance.now() * 0.008) * 0.1;
+      const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+      gradient.addColorStop(0, 'rgba(255, 20, 147, 0.5)');
+      gradient.addColorStop(0.5, 'rgba(0, 200, 255, 0.55)');
+      gradient.addColorStop(1, 'rgba(247, 255, 0, 0.45)');
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.restore();
+
+      ctx.save();
+      ctx.translate(-camera.x * 1.2, 0);
+      const beamWidth = 220;
+      for (let i = 0; i < 4; i++) {
+        const offset = (performance.now() * 0.08 + i * 90) % (beamWidth + canvas.width);
+        ctx.fillStyle = `rgba(${120 + i * 30}, ${20 + i * 60}, 255, 0.18)`;
+        ctx.beginPath();
+        ctx.moveTo(offset - beamWidth, 0);
+        ctx.lineTo(offset, 0);
+        ctx.lineTo(offset + canvas.height * 0.6, canvas.height);
+        ctx.lineTo(offset - beamWidth + canvas.height * 0.6, canvas.height);
+        ctx.closePath();
+        ctx.fill();
+      }
+      ctx.restore();
+    }
+
+    function draw() {
+      drawBackground();
+      drawPlatforms();
+      drawSlideBars();
+      drawSpinSticks();
+      drawFinishFlag();
+      drawPlayer();
+      drawSparkles(camera.x);
+      drawDiscoOverlay();
+
+      // draw dance floor indicator
+      ctx.save();
+      ctx.translate(-camera.x, 0);
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.12)';
+      ctx.fillRect(level.discoStart, level.floorY - 6, level.discoEnd - level.discoStart, 6);
+      ctx.restore();
+    }
+
+    function handleKeyDown(e) {
+      if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space'].includes(e.code)) {
+        e.preventDefault();
+      }
+      keys.add(e.code);
+      handleDanceInput(e.code);
+      if (player.stunnedTimer > 0) return;
+
+      if ((e.code === 'Space' || e.code === 'ArrowUp' || e.code === 'KeyW') && player.onGround) {
+        player.vy = -world.jumpVelocity;
+        player.onGround = false;
+        spawnSparkle(player.x + player.width / 2, player.y + player.height, 200 + Math.random() * 60);
+      }
+
+      if (e.code === 'ShiftLeft' || e.code === 'ShiftRight' || e.code === 'ArrowDown' || e.code === 'KeyS') {
+        requestSlide();
+      }
+
+      // other actions handled above
+    }
+
+    function handleKeyUp(e) {
+      keys.delete(e.code);
+      if (e.code === 'Space') {
+        if (player.vy < -120) {
+          player.vy *= 0.55;
+        }
+      }
+    }
+
+    document.addEventListener('keydown', handleKeyDown);
+    document.addEventListener('keyup', handleKeyUp);
+
+    requestAnimationFrame(gameLoop);
+  </script>
+</body>
+</html>
