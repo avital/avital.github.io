@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Skyline Jumper</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      background: linear-gradient(180deg, #90caf9 0%, #e3f2fd 60%, #b0bec5 60%, #78909c 100%);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      color: #0d47a1;
+    }
+
+    h1 {
+      margin: 32px 16px 8px;
+      font-size: clamp(1.8rem, 2.6vw, 2.5rem);
+      text-align: center;
+      letter-spacing: 0.05em;
+    }
+
+    p.description {
+      margin: 0 16px 24px;
+      max-width: 600px;
+      text-align: center;
+      color: rgba(13, 71, 161, 0.9);
+    }
+
+    #game-wrapper {
+      position: relative;
+      width: min(90vw, 900px);
+      aspect-ratio: 16 / 9;
+      box-shadow: 0 16px 32px rgba(15, 23, 42, 0.3);
+      border-radius: 16px;
+      overflow: hidden;
+      background: #e3f2fd;
+    }
+
+    canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      background: linear-gradient(180deg, rgba(227, 242, 253, 1) 0%, rgba(225, 245, 254, 1) 65%, rgba(178, 223, 219, 1) 65%, rgba(120, 144, 156, 1) 100%);
+    }
+
+    #overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      background: rgba(13, 71, 161, 0.12);
+      color: #0d47a1;
+      font-size: clamp(1rem, 2.5vw, 1.8rem);
+      text-align: center;
+      padding: 24px;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    #overlay.visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    button {
+      pointer-events: auto;
+      border: none;
+      border-radius: 999px;
+      padding: 12px 28px;
+      font-size: 1rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      cursor: pointer;
+      background: #1976d2;
+      color: #fff;
+      box-shadow: 0 10px 25px rgba(25, 118, 210, 0.35);
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    button:hover,
+    button:focus-visible {
+      transform: translateY(-1px) scale(1.02);
+      box-shadow: 0 14px 30px rgba(25, 118, 210, 0.45);
+      outline: none;
+    }
+
+    button:active {
+      transform: translateY(1px) scale(0.99);
+      box-shadow: 0 8px 20px rgba(25, 118, 210, 0.3);
+    }
+
+    footer {
+      margin: 24px 16px 40px;
+      font-size: 0.9rem;
+      color: rgba(13, 71, 161, 0.7);
+      text-align: center;
+    }
+
+    @media (max-width: 600px) {
+      h1 {
+        margin-top: 24px;
+      }
+
+      p.description {
+        font-size: 0.95rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>Skyline Jumper</h1>
+  <p class="description">
+    Leap over neon blocks as the skyline rushes by! Tap, click, or press <strong>Space / ↑</strong> to jump.
+    Survive as long as you can while the speed ramps up.
+  </p>
+  <div id="game-wrapper">
+    <canvas id="game" width="960" height="540" role="img" aria-label="Arcade runner game"></canvas>
+    <div id="overlay" aria-live="polite"></div>
+  </div>
+  <footer>
+    Pro tip: Jumps can be queued slightly before touching the ground to keep the momentum going.
+  </footer>
+
+  <script>
+    const canvas = document.getElementById("game");
+    const ctx = canvas.getContext("2d");
+    const overlay = document.getElementById("overlay");
+
+    const world = {
+      gravity: 0.85,
+      scrollSpeed: 6,
+      maxSpeed: 14,
+      acceleration: 0.003,
+      skylineOffset: 0,
+      skylineSpeedFactor: 0.3,
+      playing: false,
+      paused: false,
+      score: 0,
+      best: Number(localStorage.getItem("skyline-best") || 0),
+    };
+
+    const groundY = canvas.height * 0.78;
+
+    const player = {
+      x: canvas.width * 0.18,
+      y: groundY,
+      width: 48,
+      height: 72,
+      velocityY: 0,
+      jumping: false,
+      queuedJump: false,
+    };
+
+    const obstacles = [];
+
+    const skylineLayers = [
+      createSkylineLayer("#90a4ae", 0.35, 120),
+      createSkylineLayer("#78909c", 0.55, 90),
+      createSkylineLayer("#607d8b", 0.8, 60),
+    ];
+
+    function createSkylineLayer(color, parallax, width) {
+      const count = Math.ceil(canvas.width / width) + 4;
+      return {
+        color,
+        parallax,
+        width,
+        offset: 0,
+        heights: Array.from({ length: count }, () => canvas.height * (0.18 + Math.random() * 0.15)),
+      };
+    }
+
+    function resetGame() {
+      obstacles.length = 0;
+      player.y = groundY;
+      player.velocityY = 0;
+      player.jumping = false;
+      player.queuedJump = false;
+      world.scrollSpeed = 6;
+      world.skylineOffset = 0;
+      world.score = 0;
+      world.playing = true;
+      world.paused = false;
+      hideOverlay();
+      spawnObstacle(true);
+    }
+
+    function showOverlay(message, showButton = true) {
+      overlay.innerHTML = `<div>${message}</div>` +
+        (showButton ? '<button type="button" id="restart">Play again</button>' : "");
+      overlay.classList.add("visible");
+      if (showButton) {
+        overlay.querySelector("#restart").addEventListener("click", startRun, { once: true });
+      }
+    }
+
+    function hideOverlay() {
+      overlay.classList.remove("visible");
+      overlay.innerHTML = "";
+    }
+
+    function spawnObstacle(initial = false) {
+      const minGap = 200;
+      const maxGap = 380;
+      const width = 40 + Math.random() * 40;
+      const height = 30 + Math.random() * 120;
+      const gap = initial ? canvas.width * 0.7 : minGap + Math.random() * (maxGap - minGap);
+      const lastX = obstacles.length ? obstacles[obstacles.length - 1].x : canvas.width * 0.6;
+      obstacles.push({
+        x: Math.max(lastX + gap, canvas.width),
+        width,
+        height,
+        color: randomBlockColor(),
+      });
+    }
+
+    function randomBlockColor() {
+      const palette = ["#ff5252", "#ffca28", "#8bc34a", "#29b6f6", "#ab47bc"];
+      return palette[Math.floor(Math.random() * palette.length)];
+    }
+
+    function handleInput(event) {
+      if (event?.type === "touchstart") {
+        event.preventDefault();
+      }
+      if (!world.playing) {
+        if (world.paused) {
+          resumeGame();
+        } else {
+          startRun();
+        }
+        return;
+      }
+      if (!player.jumping) {
+        jump();
+      } else {
+        player.queuedJump = true;
+      }
+    }
+
+    function jump() {
+      player.velocityY = -17;
+      player.jumping = true;
+    }
+
+    function updatePlayer() {
+      player.velocityY += world.gravity;
+      player.y += player.velocityY;
+
+      if (player.y >= groundY) {
+        player.y = groundY;
+        player.velocityY = 0;
+        if (player.jumping && player.queuedJump) {
+          player.queuedJump = false;
+          jump();
+        } else {
+          player.jumping = false;
+          player.queuedJump = false;
+        }
+      }
+    }
+
+    function updateObstacles() {
+      if (!obstacles.length || obstacles[obstacles.length - 1].x < canvas.width * 0.7) {
+        spawnObstacle();
+      }
+
+      for (let i = obstacles.length - 1; i >= 0; i--) {
+        const obstacle = obstacles[i];
+        obstacle.x -= world.scrollSpeed;
+
+        if (obstacle.x + obstacle.width < 0) {
+          obstacles.splice(i, 1);
+          world.score++;
+        }
+      }
+    }
+
+    function checkCollisions() {
+      return obstacles.some((obstacle) => {
+        const playerTop = player.y - player.height;
+        const playerRight = player.x + player.width;
+        const playerLeft = player.x;
+        const obstacleTop = groundY - obstacle.height;
+        const obstacleRight = obstacle.x + obstacle.width;
+        const obstacleLeft = obstacle.x;
+
+        return playerRight > obstacleLeft + 6 &&
+          playerLeft + 6 < obstacleRight &&
+          player.y > obstacleTop &&
+          playerTop < groundY + 4;
+      });
+    }
+
+    function updateSkyline() {
+      world.skylineOffset += world.scrollSpeed * world.skylineSpeedFactor;
+      if (world.skylineOffset > canvas.width) {
+        world.skylineOffset -= canvas.width;
+      }
+
+      skylineLayers.forEach((layer) => {
+        layer.offset += world.scrollSpeed * layer.parallax;
+        while (layer.offset >= layer.width) {
+          layer.offset -= layer.width;
+          layer.heights.shift();
+          layer.heights.push(canvas.height * (0.18 + Math.random() * 0.15));
+        }
+      });
+    }
+
+    function drawBackground() {
+      ctx.fillStyle = "#bbdefb";
+      ctx.fillRect(0, 0, canvas.width, groundY);
+
+      ctx.fillStyle = "#546e7a";
+      ctx.fillRect(0, groundY, canvas.width, canvas.height - groundY);
+
+      skylineLayers.forEach(drawSkylineLayer);
+
+      const stripeHeight = 6;
+      for (let i = -1; i < canvas.width / 36; i++) {
+        const x = (i * 36 + (world.skylineOffset * 2)) % (canvas.width + 36) - 36;
+        ctx.fillStyle = "rgba(255, 255, 255, 0.45)";
+        ctx.fillRect(x, groundY - stripeHeight, 24, stripeHeight);
+      }
+    }
+
+    function drawSkylineLayer(layer) {
+      ctx.fillStyle = layer.color;
+      const startX = -layer.offset - layer.width;
+      for (let i = 0; i < layer.heights.length; i++) {
+        const x = startX + i * layer.width;
+        ctx.fillRect(x, groundY - layer.heights[i], layer.width, layer.heights[i]);
+      }
+    }
+
+    function drawPlayer() {
+      const bodyHeight = player.height * 0.7;
+      const legHeight = player.height - bodyHeight;
+      const playerTop = player.y - player.height;
+
+      // Shadow
+      const shadowWidth = player.width * 0.8;
+      const shadowX = player.x + (player.width - shadowWidth) / 2;
+      const elevation = Math.max(0, groundY - player.y);
+      const shadowAlpha = Math.max(0.2, 0.6 - elevation / 120);
+      ctx.fillStyle = `rgba(38, 50, 56, ${shadowAlpha})`;
+      ctx.beginPath();
+      ctx.ellipse(player.x + player.width / 2, groundY + 4, shadowWidth, 12, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Body
+      ctx.fillStyle = "#1e88e5";
+      ctx.fillRect(player.x, playerTop, player.width, bodyHeight);
+
+      // Head
+      const headSize = player.width * 0.46;
+      ctx.fillStyle = "#ffeb3b";
+      ctx.beginPath();
+      ctx.arc(player.x + player.width / 2, playerTop - headSize / 3, headSize / 2, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Legs
+      ctx.fillStyle = "#0d47a1";
+      ctx.fillRect(player.x + player.width * 0.12, playerTop + bodyHeight, player.width * 0.3, legHeight);
+      ctx.fillRect(player.x + player.width * 0.58, playerTop + bodyHeight, player.width * 0.3, legHeight);
+
+      // Jet trail
+      if (player.velocityY < -2) {
+        ctx.fillStyle = "rgba(255, 255, 255, 0.6)";
+        ctx.beginPath();
+        ctx.ellipse(player.x + player.width / 2, player.y - 8, player.width * 0.32, 10, 0, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    function drawObstacles() {
+      obstacles.forEach((obstacle) => {
+        const height = obstacle.height;
+        const top = groundY - height;
+        ctx.fillStyle = obstacle.color;
+        ctx.fillRect(obstacle.x, top, obstacle.width, height);
+
+        ctx.fillStyle = "rgba(255, 255, 255, 0.35)";
+        ctx.fillRect(obstacle.x + 4, top + 4, obstacle.width - 8, 6);
+      });
+    }
+
+    function drawHUD() {
+      ctx.fillStyle = "rgba(13, 71, 161, 0.8)";
+      ctx.font = "bold 32px 'Segoe UI', sans-serif";
+      ctx.textAlign = "left";
+      ctx.fillText(`Score: ${world.score}`, 24, 48);
+
+      ctx.font = "16px 'Segoe UI', sans-serif";
+      ctx.fillText(`Speed: ${(world.scrollSpeed).toFixed(1)}x`, 24, 74);
+
+      ctx.textAlign = "right";
+      ctx.fillText(`Best: ${world.best}`, canvas.width - 24, 48);
+    }
+
+    function update() {
+      if (!world.playing) {
+        drawFrame();
+        return;
+      }
+
+      updatePlayer();
+      updateObstacles();
+      updateSkyline();
+
+      if (checkCollisions()) {
+        world.playing = false;
+        world.paused = false;
+        world.best = Math.max(world.best, world.score);
+        localStorage.setItem("skyline-best", world.best);
+        showOverlay(`<strong>Game over!</strong><br>You cleared ${world.score} blocks.<br>Best: ${world.best}`);
+        drawFrame();
+        return;
+      }
+
+      world.scrollSpeed = Math.min(world.maxSpeed, world.scrollSpeed + world.acceleration);
+      drawFrame();
+      requestAnimationFrame(update);
+    }
+
+    function drawFrame() {
+      drawBackground();
+      drawObstacles();
+      drawPlayer();
+      drawHUD();
+    }
+
+    function startRun() {
+      resetGame();
+      requestAnimationFrame(update);
+    }
+
+    function resumeGame() {
+      if (world.playing) return;
+      world.playing = true;
+      world.paused = false;
+      hideOverlay();
+      requestAnimationFrame(update);
+    }
+
+    function init() {
+      document.addEventListener("keydown", (event) => {
+        if (["Space", "ArrowUp", "KeyW"].includes(event.code)) {
+          event.preventDefault();
+          handleInput();
+        }
+      });
+      if (window.PointerEvent) {
+        window.addEventListener("pointerdown", (event) => {
+          if (event.target.closest("button")) {
+            return;
+          }
+          if (event.pointerType === "mouse" && event.button !== 0) {
+            return;
+          }
+          if (event.pointerType === "touch") {
+            return;
+          }
+          handleInput(event);
+        });
+      } else {
+        window.addEventListener("mousedown", (event) => {
+          if (event.target.closest("button")) {
+            return;
+          }
+          if (event.button !== 0) {
+            return;
+          }
+          handleInput(event);
+        });
+      }
+
+      window.addEventListener("touchstart", handleInput, { passive: false });
+
+      showOverlay('<strong>Tap, click, or press Space to start.</strong><br>Leap over every block you see!');
+      drawFrame();
+    }
+
+    function setupVisibilityHandling() {
+      document.addEventListener("visibilitychange", () => {
+        if (document.hidden && world.playing) {
+          world.playing = false;
+          world.paused = true;
+          showOverlay('<strong>Paused</strong><br>Click or press Space to resume.', false);
+        }
+      });
+    }
+
+    init();
+    setupVisibilityHandling();
+  </script>
+</body>
+</html>
