@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cat Bounce Party</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      font-family: "Baloo 2", "Trebuchet MS", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: radial-gradient(circle at top, #ffd3f5 0%, #d0f0ff 45%, #92c5ff 100%);
+      color: #1b1b33;
+    }
+
+    header {
+      text-align: center;
+      padding: 2.5rem 1rem 1rem;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(2.2rem, 5vw, 3.4rem);
+      color: #5c0ba3;
+      text-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+      letter-spacing: 0.05em;
+    }
+
+    header p {
+      margin: 0.25rem auto 0;
+      max-width: 720px;
+      line-height: 1.6;
+      font-size: 1.05rem;
+    }
+
+    main {
+      width: min(960px, 96vw);
+      background: rgba(255, 255, 255, 0.82);
+      border-radius: 24px;
+      padding: 1.5rem 1rem 2rem;
+      box-shadow: 0 18px 42px rgba(25, 35, 70, 0.25);
+      margin-bottom: 2.5rem;
+      backdrop-filter: blur(10px);
+    }
+
+    .instructions {
+      display: grid;
+      gap: 0.75rem;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      margin-bottom: 1.5rem;
+      background: rgba(255, 255, 255, 0.9);
+      padding: 1rem;
+      border-radius: 16px;
+      box-shadow: inset 0 1px 8px rgba(93, 53, 156, 0.15);
+    }
+
+    .instructions h2 {
+      grid-column: 1 / -1;
+      margin: 0;
+      font-size: 1.4rem;
+      color: #c20be0;
+    }
+
+    .instructions p {
+      margin: 0;
+      line-height: 1.5;
+      font-size: 0.98rem;
+    }
+
+    #hud {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.95rem;
+      margin-bottom: 0.75rem;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+
+    #hud span {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.35rem 0.75rem;
+      background: linear-gradient(135deg, rgba(255, 213, 80, 0.95), rgba(255, 140, 208, 0.95));
+      color: #310752;
+      border-radius: 999px;
+      box-shadow: 0 8px 18px rgba(240, 110, 160, 0.4);
+      font-weight: 600;
+    }
+
+    canvas {
+      width: 100%;
+      height: auto;
+      border-radius: 18px;
+      border: 3px solid rgba(70, 40, 120, 0.25);
+      background: linear-gradient(#93d2ff 0%, #f3f9ff 42%, #7ee5ff 100%);
+    }
+
+    footer {
+      color: rgba(20, 20, 50, 0.7);
+      font-size: 0.85rem;
+      padding-bottom: 2rem;
+      text-align: center;
+    }
+
+    @media (max-width: 600px) {
+      header {
+        padding-top: 1.5rem;
+      }
+
+      main {
+        padding: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Cat Bounce Party</h1>
+    <p>
+      Leap between floating platforms, slide under hazards, and conquer the disco floor with purr-fect dance moves.
+      Help the fearless feline stay on beat and finish the course!
+    </p>
+  </header>
+  <main>
+    <section class="instructions">
+      <h2>How to Play</h2>
+      <p><strong>Move:</strong> A / D or ← / → &nbsp; &bull; &nbsp; <strong>Jump:</strong> W, Space, or ↑</p>
+      <p><strong>Slide:</strong> S or ↓ while on the ground to zip under low bars.</p>
+      <p><strong>Dance Mode:</strong> Press F when the cat is shimmering in the disco zone. Hit the arrows shown to earn style points!</p>
+      <p>Reach the golden goal platform at the end to celebrate a flawless run. Watch out for rotating bonk bars!</p>
+    </section>
+    <div id="hud">
+      <span id="progress">Progress: 0%</span>
+      <span id="dance-score">Dance Score: 0</span>
+      <span id="status">Status: Ready to groove</span>
+    </div>
+    <canvas id="game" width="960" height="540" aria-label="A 2D obstacle course game starring a cartoon cat."></canvas>
+  </main>
+  <footer>
+    Built with vanilla HTML, CSS, and JavaScript &mdash; no downloads required. Press R to reset at any time.
+  </footer>
+  <script>
+    const canvas = document.getElementById("game");
+    const ctx = canvas.getContext("2d");
+    const keys = {};
+    const statusEl = document.getElementById("status");
+    const progressEl = document.getElementById("progress");
+    const danceEl = document.getElementById("dance-score");
+
+    const world = {
+      width: 2400,
+      height: canvas.height
+    };
+
+    const cat = {
+      x: 80,
+      y: 360,
+      width: 52,
+      height: 64,
+      baseHeight: 64,
+      velX: 0,
+      velY: 0,
+      maxSpeed: 7,
+      onGround: false,
+      sliding: false,
+      slideTimer: 0,
+      facing: 1,
+      stylePoints: 0
+    };
+
+    const gravity = 0.75;
+    const moveAcceleration = 0.6;
+    const airAcceleration = 0.35;
+    const groundFriction = 0.75;
+    const airFriction = 0.985;
+
+    let cameraX = 0;
+    let lastTimestamp = 0;
+    let danceMode = false;
+    let danceQueue = [];
+    let danceIndex = 0;
+    let danceFlash = 0;
+    let danceCooldown = 0;
+    let danceMessage = "";
+    let danceMessageTimer = 0;
+    let goalReached = false;
+
+    const floorPlatform = { x: 0, y: 420, w: world.width, h: 160 };
+
+    const platforms = [
+      floorPlatform,
+      { x: 220, y: 340, w: 120, h: 20 },
+      { x: 420, y: 300, w: 160, h: 20 },
+      { x: 650, y: 260, w: 140, h: 20 },
+      { x: 820, y: 320, w: 140, h: 20 },
+      { x: 1000, y: 280, w: 180, h: 20 },
+      { x: 1160, y: 220, w: 130, h: 20 },
+      { x: 1320, y: 300, w: 130, h: 20 },
+      { x: 1520, y: 280, w: 220, h: 20 },
+      { x: 1820, y: 320, w: 150, h: 20 },
+      { x: 1980, y: 280, w: 140, h: 20 },
+      { x: 2150, y: 260, w: 160, h: 20 }
+    ];
+
+    const discoZone = { x: 1500, y: 420, w: 260, h: 160 };
+
+    const goal = { x: 2260, y: 240, w: 120, h: 20 };
+
+    const spinSticks = [
+      { x: 560, y: 400, length: 140, thickness: 20, angle: 0, speed: 0.04 },
+      { x: 920, y: 380, length: 180, thickness: 20, angle: Math.PI / 4, speed: -0.035 },
+      { x: 1700, y: 360, length: 160, thickness: 18, angle: Math.PI / 6, speed: 0.05 }
+    ];
+
+    const clouds = Array.from({ length: 10 }, () => ({
+      x: Math.random() * world.width,
+      y: Math.random() * 220,
+      size: 60 + Math.random() * 120
+    }));
+
+    function roundRectPath(ctx, x, y, width, height, radius) {
+      const r = Math.min(radius, width / 2, height / 2);
+      ctx.beginPath();
+      ctx.moveTo(x + r, y);
+      ctx.lineTo(x + width - r, y);
+      ctx.quadraticCurveTo(x + width, y, x + width, y + r);
+      ctx.lineTo(x + width, y + height - r);
+      ctx.quadraticCurveTo(x + width, y + height, x + width - r, y + height);
+      ctx.lineTo(x + r, y + height);
+      ctx.quadraticCurveTo(x, y + height, x, y + height - r);
+      ctx.lineTo(x, y + r);
+      ctx.quadraticCurveTo(x, y, x + r, y);
+      ctx.closePath();
+    }
+
+    function resetGame() {
+      cat.x = 80;
+      cat.y = 360;
+      cat.velX = 0;
+      cat.velY = 0;
+      cat.onGround = false;
+      cat.sliding = false;
+      cat.slideTimer = 0;
+      cat.height = cat.baseHeight;
+      cat.stylePoints = 0;
+      danceMode = false;
+      danceQueue = [];
+      danceIndex = 0;
+      danceFlash = 0;
+      danceCooldown = 0;
+      danceMessage = "";
+      danceMessageTimer = 0;
+      goalReached = false;
+      statusEl.textContent = "Status: Ready to groove";
+      updateHud();
+    }
+
+    function updateHud() {
+      const progress = Math.min(100, Math.round((cat.x / (goal.x + goal.w)) * 100));
+      progressEl.textContent = `Progress: ${progress}%`;
+      danceEl.textContent = `Dance Score: ${cat.stylePoints}`;
+    }
+
+    function beginDance() {
+      if (danceMode || danceCooldown > 0) return;
+      danceMode = true;
+      danceQueue = Array.from({ length: 5 + Math.floor(Math.random() * 3) }, () => {
+        const pool = ["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"];
+        return pool[Math.floor(Math.random() * pool.length)];
+      });
+      danceIndex = 0;
+      danceFlash = 0;
+      danceMessage = "Hit the arrows in rhythm!";
+      statusEl.textContent = "Status: Dancing!";
+      cat.velX = 0;
+      cat.velY = 0;
+    }
+
+    function finishDance(success) {
+      if (success) {
+        cat.stylePoints += 100 + Math.floor(Math.random() * 40);
+        danceMessage = "Stylish! Jump back into action.";
+      } else {
+        danceMessage = "Missed the beat! Try again.";
+      }
+      danceMessageTimer = 150;
+      danceMode = false;
+      danceCooldown = 90;
+      statusEl.textContent = "Status: Back on course";
+      updateHud();
+    }
+
+    function handleKeyDown(e) {
+      if (e.repeat) return;
+      if (danceMode) {
+        if (e.code === "Escape") {
+          finishDance(false);
+          return;
+        }
+        const expected = danceQueue[danceIndex];
+        if (e.code === expected) {
+          danceIndex++;
+          danceFlash = 12;
+          if (danceIndex >= danceQueue.length) {
+            finishDance(true);
+          }
+        } else if (["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(e.code)) {
+          danceFlash = 0;
+          finishDance(false);
+        }
+        e.preventDefault();
+        return;
+      }
+
+      keys[e.code] = true;
+      if (["Space", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.code)) {
+        e.preventDefault();
+      }
+
+      if (e.code === "KeyF" && isCatInDiscoZone()) {
+        beginDance();
+      } else if (e.code === "KeyR") {
+        resetGame();
+      }
+    }
+
+    function handleKeyUp(e) {
+      keys[e.code] = false;
+    }
+
+    document.addEventListener("keydown", handleKeyDown);
+    document.addEventListener("keyup", handleKeyUp);
+
+    function isCatInDiscoZone() {
+      const withinX = cat.x + cat.width > discoZone.x && cat.x < discoZone.x + discoZone.w;
+      const onGround = cat.y + cat.height >= discoZone.y && cat.y <= discoZone.y + discoZone.h;
+      return withinX && onGround;
+    }
+
+    function update(delta) {
+      if (danceCooldown > 0) danceCooldown--;
+      if (danceMessageTimer > 0) {
+        danceMessageTimer--;
+        if (danceMessageTimer === 0) {
+          danceMessage = "";
+        }
+      }
+      if (danceMode) {
+        if (danceFlash > 0) danceFlash--;
+        return;
+      }
+
+      const acceleration = cat.onGround ? moveAcceleration : airAcceleration;
+
+      if (keys["ArrowLeft"] || keys["KeyA"]) {
+        cat.velX -= acceleration;
+        cat.facing = -1;
+      }
+      if (keys["ArrowRight"] || keys["KeyD"]) {
+        cat.velX += acceleration;
+        cat.facing = 1;
+      }
+
+      if ((keys["Space"] || keys["ArrowUp"] || keys["KeyW"]) && cat.onGround) {
+        cat.velY = -14;
+        cat.onGround = false;
+      }
+
+      if ((keys["ArrowDown"] || keys["KeyS"]) && cat.onGround && !cat.sliding) {
+        cat.sliding = true;
+        cat.slideTimer = 28;
+        cat.height = cat.baseHeight * 0.55;
+        cat.y += cat.baseHeight - cat.height;
+        cat.velX += 1.2 * cat.facing;
+      }
+
+      if (!keys["ArrowDown"] && !keys["KeyS"]) {
+        endSlideIfNeeded();
+      }
+
+      if (cat.sliding) {
+        cat.slideTimer--;
+        cat.velX += 0.12 * cat.facing;
+        if (cat.slideTimer <= 0) {
+          endSlideIfNeeded();
+        }
+      }
+
+      const friction = cat.onGround ? groundFriction : airFriction;
+      cat.velX *= friction;
+
+      if (cat.velX > cat.maxSpeed) cat.velX = cat.maxSpeed;
+      if (cat.velX < -cat.maxSpeed) cat.velX = -cat.maxSpeed;
+
+      cat.velY += gravity;
+      if (cat.velY > 18) cat.velY = 18;
+
+      cat.x += cat.velX * delta;
+      resolveHorizontalCollisions();
+
+      cat.y += cat.velY * delta;
+      resolveVerticalCollisions();
+
+      cameraX = Math.max(0, Math.min(cat.x - canvas.width / 2 + cat.width / 2, world.width - canvas.width));
+
+      spinSticks.forEach((stick) => {
+        stick.angle += stick.speed * delta;
+      });
+
+      handleSpinStickHits();
+
+      if (isCatInDiscoZone()) {
+        statusEl.textContent = "Status: Disco detected! Press F to dance.";
+      } else if (!danceMode && !goalReached) {
+        statusEl.textContent = "Status: Keep jumping!";
+      }
+
+      const reachX = cat.x + cat.width > goal.x && cat.x < goal.x + goal.w;
+      const reachY = cat.y + cat.height >= goal.y && cat.y + cat.height <= goal.y + 8;
+      if (reachX && reachY && !goalReached) {
+        goalReached = true;
+        statusEl.textContent = "Status: Goal reached! Hit R to party again.";
+      }
+
+      updateHud();
+    }
+
+    function endSlideIfNeeded() {
+      if (!cat.sliding) return;
+      cat.sliding = false;
+      const oldHeight = cat.height;
+      cat.height = cat.baseHeight;
+      cat.y -= cat.height - oldHeight;
+    }
+
+    function resolveHorizontalCollisions() {
+      platforms.forEach((platform) => {
+        if (!isSolid(platform)) return;
+        if (
+          cat.x + cat.width > platform.x &&
+          cat.x < platform.x + platform.w &&
+          cat.y + cat.height > platform.y &&
+          cat.y < platform.y + platform.h
+        ) {
+          if (cat.velX > 0) {
+            cat.x = platform.x - cat.width;
+          } else if (cat.velX < 0) {
+            cat.x = platform.x + platform.w;
+          }
+          cat.velX = 0;
+        }
+      });
+
+      if (cat.x < 0) cat.x = 0;
+      if (cat.x + cat.width > world.width) cat.x = world.width - cat.width;
+    }
+
+    function resolveVerticalCollisions() {
+      cat.onGround = false;
+      platforms.forEach((platform) => {
+        if (!isSolid(platform)) return;
+        if (
+          cat.x + cat.width > platform.x &&
+          cat.x < platform.x + platform.w &&
+          cat.y + cat.height > platform.y &&
+          cat.y < platform.y + platform.h
+        ) {
+          if (cat.velY > 0) {
+            cat.y = platform.y - cat.height;
+            cat.velY = 0;
+            cat.onGround = true;
+          } else if (cat.velY < 0) {
+            cat.y = platform.y + platform.h;
+            cat.velY = 0;
+          }
+        }
+      });
+
+      if (cat.y + cat.height > world.height) {
+        cat.y = world.height - cat.height;
+        cat.velY = 0;
+        cat.onGround = true;
+      }
+    }
+
+    function isSolid(platform) {
+      return platform !== discoZone;
+    }
+
+    function handleSpinStickHits() {
+      const catCenterX = cat.x + cat.width / 2;
+      const catCenterY = cat.y + cat.height / 2;
+      const radius = Math.min(cat.width, cat.height) / 2;
+      spinSticks.forEach((stick) => {
+        const sin = Math.sin(-stick.angle);
+        const cos = Math.cos(-stick.angle);
+        const relX = catCenterX - stick.x;
+        const relY = catCenterY - stick.y;
+        const localX = relX * cos - relY * sin;
+        const localY = relX * sin + relY * cos;
+        const halfLength = stick.length / 2;
+        const halfThickness = stick.thickness / 2;
+        const withinX = Math.abs(localX) <= halfLength + radius;
+        const withinY = Math.abs(localY) <= halfThickness + radius;
+        if (withinX && withinY) {
+          const push = Math.sign(localY) || 1;
+          cat.velY = -12;
+          cat.velX += Math.cos(stick.angle) * 6 * push;
+          cat.y -= 12;
+        }
+      });
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.save();
+      ctx.translate(-cameraX, 0);
+
+      drawBackground();
+      drawPlatforms();
+      drawDiscoZone();
+      drawGoal();
+      drawSpinSticks();
+      drawCat();
+
+      ctx.restore();
+      drawDanceOverlay();
+    }
+
+    function drawBackground() {
+      ctx.fillStyle = "#8ed0ff";
+      ctx.fillRect(cameraX, 0, canvas.width, canvas.height);
+      ctx.fillStyle = "rgba(255,255,255,0.85)";
+      clouds.forEach((cloud) => {
+        const offsetX = cloud.x - cameraX * 0.4;
+        drawCloud(offsetX, cloud.y, cloud.size);
+      });
+    }
+
+    function drawCloud(x, y, size) {
+      ctx.beginPath();
+      ctx.fillStyle = "rgba(255, 255, 255, 0.85)";
+      ctx.arc(x, y, size * 0.3, 0, Math.PI * 2);
+      ctx.arc(x + size * 0.3, y + size * 0.1, size * 0.35, 0, Math.PI * 2);
+      ctx.arc(x - size * 0.3, y + size * 0.1, size * 0.25, 0, Math.PI * 2);
+      ctx.arc(x + size * 0.5, y + size * 0.2, size * 0.28, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    function drawPlatforms() {
+      ctx.fillStyle = "#8dd77c";
+      platforms.forEach((platform) => {
+        ctx.fillStyle = platform === floorPlatform ? "#78c06c" : "#8dd77c";
+        ctx.fillRect(platform.x, platform.y, platform.w, platform.h);
+        ctx.fillStyle = "rgba(255, 255, 255, 0.35)";
+        ctx.fillRect(platform.x, platform.y, platform.w, 6);
+      });
+    }
+
+    function drawDiscoZone() {
+      const gradient = ctx.createLinearGradient(discoZone.x, discoZone.y, discoZone.x, discoZone.y + discoZone.h);
+      gradient.addColorStop(0, "rgba(255, 80, 255, 0.25)");
+      gradient.addColorStop(1, "rgba(60, 0, 120, 0.45)");
+      ctx.fillStyle = gradient;
+      ctx.fillRect(discoZone.x, discoZone.y - 10, discoZone.w, discoZone.h + 10);
+      ctx.save();
+      ctx.globalCompositeOperation = "lighter";
+      const stripes = 8;
+      for (let i = 0; i < stripes; i++) {
+        const alpha = 0.4 + Math.sin(performance.now() / 400 + i) * 0.2;
+        ctx.fillStyle = `rgba(${120 + i * 15}, ${30 + i * 20}, 255, ${alpha})`;
+        ctx.fillRect(discoZone.x + (i / stripes) * discoZone.w, discoZone.y - 10, discoZone.w / stripes, discoZone.h + 10);
+      }
+      ctx.restore();
+      ctx.fillStyle = "#fff";
+      ctx.font = "20px 'Baloo 2', sans-serif";
+      ctx.fillText("Disco Floor", discoZone.x + 30, discoZone.y - 20);
+    }
+
+    function drawGoal() {
+      const glow = ctx.createLinearGradient(goal.x, goal.y, goal.x, goal.y + goal.h);
+      glow.addColorStop(0, "#fff5a1");
+      glow.addColorStop(1, "#ffc300");
+      ctx.fillStyle = glow;
+      ctx.fillRect(goal.x, goal.y, goal.w, goal.h);
+      ctx.strokeStyle = "rgba(255, 230, 130, 0.8)";
+      ctx.lineWidth = 6;
+      ctx.strokeRect(goal.x - 8, goal.y - 60, goal.w + 16, 80);
+      ctx.fillStyle = "#ffdd55";
+      ctx.font = "22px 'Baloo 2', sans-serif";
+      ctx.fillText("Goal", goal.x + goal.w / 2 - 28, goal.y - 16);
+    }
+
+    function drawSpinSticks() {
+      spinSticks.forEach((stick) => {
+        ctx.save();
+        ctx.translate(stick.x, stick.y);
+        ctx.rotate(stick.angle);
+        const gradient = ctx.createLinearGradient(-stick.length / 2, 0, stick.length / 2, 0);
+        gradient.addColorStop(0, "#ff8acf");
+        gradient.addColorStop(0.5, "#fff7aa");
+        gradient.addColorStop(1, "#8aa9ff");
+        ctx.fillStyle = gradient;
+        ctx.fillRect(-stick.length / 2, -stick.thickness / 2, stick.length, stick.thickness);
+        ctx.fillStyle = "#fffb";
+        ctx.fillRect(-stick.length / 2, -stick.thickness / 2, stick.length, 4);
+        ctx.restore();
+      });
+    }
+
+    function drawCat() {
+      ctx.save();
+      ctx.translate(cat.x + cat.width / 2, cat.y + cat.height);
+      ctx.scale(cat.facing, 1);
+      const bodyWidth = cat.width * 0.7;
+      const bodyHeight = cat.height * 0.55;
+      const headSize = cat.height * 0.45;
+      const color = danceMode ? "#ffb6f6" : "#f9c16d";
+      ctx.fillStyle = color;
+      ctx.strokeStyle = "#5a2e11";
+      ctx.lineWidth = 3;
+
+      // tail
+      ctx.save();
+      ctx.translate(-bodyWidth / 2 - 8, -bodyHeight / 2);
+      ctx.rotate(Math.sin(performance.now() / 250) * 0.2 + 0.3);
+      ctx.fillStyle = color;
+      roundRectPath(ctx, -6, -14, 12, 34, 6);
+      ctx.fill();
+      ctx.restore();
+
+      // body
+      roundRectPath(ctx, -bodyWidth / 2, -bodyHeight, bodyWidth, bodyHeight, 16);
+      ctx.fill();
+      ctx.stroke();
+
+      // head
+      roundRectPath(ctx, -headSize / 2, -bodyHeight - headSize, headSize, headSize, 18);
+      ctx.fill();
+      ctx.stroke();
+
+      // ears
+      ctx.beginPath();
+      ctx.moveTo(-headSize / 2 + 6, -bodyHeight - headSize + 8);
+      ctx.lineTo(-headSize / 2 + 14, -bodyHeight - headSize - 18);
+      ctx.lineTo(-headSize / 2 + 28, -bodyHeight - headSize + 6);
+      ctx.closePath();
+      ctx.fillStyle = "#f6a0d6";
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(headSize / 2 - 6, -bodyHeight - headSize + 8);
+      ctx.lineTo(headSize / 2 - 14, -bodyHeight - headSize - 18);
+      ctx.lineTo(headSize / 2 - 28, -bodyHeight - headSize + 6);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      // face
+      ctx.fillStyle = "#3f2509";
+      ctx.beginPath();
+      ctx.arc(-headSize / 4, -bodyHeight - headSize / 1.9, 6, 0, Math.PI * 2);
+      ctx.arc(headSize / 4, -bodyHeight - headSize / 1.9, 6, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(-6, -bodyHeight - headSize / 1.6);
+      ctx.quadraticCurveTo(0, -bodyHeight - headSize / 1.4, 6, -bodyHeight - headSize / 1.6);
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      ctx.restore();
+    }
+
+    function drawDanceOverlay() {
+      if (danceMode) {
+        ctx.save();
+        ctx.fillStyle = "rgba(20, 0, 40, 0.65)";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = "#ffe1ff";
+        ctx.font = "32px 'Baloo 2', sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText("Dance Mode!", canvas.width / 2, 120);
+        ctx.font = "20px 'Baloo 2', sans-serif";
+        ctx.fillText("Press the arrows shown to keep the rhythm. ESC to bail out.", canvas.width / 2, 160);
+        const icons = danceQueue.map((code, index) => ({ code, index }));
+        icons.forEach(({ code, index }) => {
+          const x = canvas.width / 2 - (icons.length * 60) / 2 + index * 60 + 30;
+          const y = 240;
+          const active = index === danceIndex;
+          ctx.fillStyle = active ? "#ffec85" : "rgba(255,255,255,0.8)";
+          roundRectPath(ctx, x - 30, y - 30, 60, 60, 12);
+          ctx.fill();
+          ctx.strokeStyle = active && danceFlash > 0 ? "#ff3fd4" : "#7135ff";
+          ctx.lineWidth = active ? 4 : 2;
+          ctx.stroke();
+          ctx.fillStyle = "#311050";
+          ctx.font = "26px 'Baloo 2', sans-serif";
+          ctx.fillText(code.replace("Arrow", ""), x, y + 8);
+        });
+        ctx.restore();
+      }
+
+      if (danceMessage) {
+        ctx.save();
+        ctx.textAlign = "center";
+        ctx.fillStyle = "rgba(0, 0, 0, 0.6)";
+        ctx.font = "18px 'Baloo 2', sans-serif";
+        ctx.fillText(danceMessage, canvas.width / 2, canvas.height - 32);
+        ctx.restore();
+      }
+    }
+
+    function loop(timestamp) {
+      const delta = Math.min((timestamp - lastTimestamp) / 16.666, 1.4);
+      lastTimestamp = timestamp;
+      update(delta);
+      draw();
+      requestAnimationFrame(loop);
+    }
+
+    resetGame();
+    requestAnimationFrame(loop);
+  </script>
+</body>
+</html>
