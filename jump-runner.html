@@ -1,0 +1,549 @@
+<!doctype html>
+<html lang="en" prefix="og: http://ogp.me/ns#">
+<head>
+  <meta charset="utf-8">
+  <title>Jump Runner Game &#8211; Avital Oliver</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Play Jump Runner, a fast-paced endless runner where you leap over blocks while the world rushes by.">
+  <meta name="keywords" content="game, endless runner, jump, blocks">
+  <meta property="og:locale" content="en_US">
+  <meta property="og:title" content="Jump Runner Game &#8211; Avital Oliver">
+  <meta property="og:description" content="Leap over blocks and chase a new high score in this browser-friendly endless runner.">
+  <meta property="og:url" content="/jump-runner.html">
+  <meta property="og:site_name" content="Avital Oliver">
+  <meta property="og:image" content="/images/library2.jpg">
+  <link rel="shortcut icon" href="/favicon.ico">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Crimson+Text:400,400italic,700,700italic">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,600,700">
+  <style>
+    :root {
+      color-scheme: dark;
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+
+    body, h1, h2, h3, p, ul {
+      margin: 0;
+    }
+
+    body {
+      font-family: 'Source Sans Pro', 'Helvetica Neue', Arial, sans-serif;
+      background: radial-gradient(circle at top, #0b1d33 0%, #040b15 55%, #03060c 100%);
+      color: #f2f6ff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      line-height: 1.6;
+    }
+
+    a {
+      color: #7fd7ff;
+      text-decoration: none;
+    }
+
+    a:hover, a:focus {
+      text-decoration: underline;
+    }
+
+    .game-site-header {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      background: rgba(6, 19, 38, 0.92);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(102, 153, 204, 0.28);
+    }
+
+    .game-header-inner {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 1.1rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .game-brand {
+      font-family: 'Crimson Text', Georgia, serif;
+      font-size: 1.5rem;
+      letter-spacing: 0.04em;
+      color: #f4f7ff;
+    }
+
+    .game-nav {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      font-weight: 600;
+      font-size: 0.95rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .game-main {
+      flex: 1;
+      width: min(960px, 92vw);
+      margin: 0 auto;
+      padding: 3.5rem 0 4rem;
+    }
+
+    .game-intro {
+      text-align: center;
+      margin-bottom: 2.6rem;
+    }
+
+    .game-intro h1 {
+      font-family: 'Crimson Text', Georgia, serif;
+      font-size: clamp(2.4rem, 5vw, 3.4rem);
+      letter-spacing: 0.05em;
+      margin-bottom: 0.5rem;
+      color: #f9fbff;
+    }
+
+    .game-intro p {
+      font-size: 1.1rem;
+      color: rgba(226, 237, 255, 0.85);
+      max-width: 640px;
+      margin: 0.5rem auto 0;
+    }
+
+    .game-stage {
+      background: linear-gradient(160deg, rgba(9, 19, 33, 0.65), rgba(5, 11, 19, 0.95));
+      border: 1px solid rgba(88, 142, 200, 0.25);
+      border-radius: 20px;
+      padding: clamp(1rem, 3vw, 1.8rem);
+      box-shadow: 0 35px 70px -35px rgba(4, 10, 18, 0.9);
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      max-width: 920px;
+      height: auto;
+      margin: 0 auto;
+      border-radius: 18px;
+      border: 1px solid rgba(132, 181, 240, 0.25);
+      background: #050d18;
+      box-shadow: 0 22px 45px -25px rgba(0, 0, 0, 0.75);
+    }
+
+    .game-hints {
+      margin-top: 1.7rem;
+      background: rgba(10, 27, 46, 0.75);
+      border: 1px solid rgba(88, 142, 200, 0.22);
+      border-radius: 14px;
+      padding: 1.1rem 1.4rem;
+      color: rgba(225, 237, 255, 0.9);
+      font-size: 0.98rem;
+      line-height: 1.7;
+    }
+
+    .game-hints strong {
+      color: #9ce4ff;
+    }
+
+    .game-footer {
+      text-align: center;
+      padding: 2rem 1rem 3rem;
+      color: rgba(194, 210, 232, 0.7);
+      font-size: 0.9rem;
+    }
+
+    .game-footer a {
+      color: #9ce4ff;
+    }
+
+    @media (max-width: 720px) {
+      .game-header-inner {
+        flex-direction: column;
+        gap: 0.6rem;
+      }
+
+      .game-nav {
+        gap: 1rem;
+      }
+
+      .game-main {
+        padding: 2.6rem 0 3rem;
+      }
+
+      .game-hints {
+        font-size: 0.94rem;
+      }
+    }
+
+    @media (max-width: 500px) {
+      .game-nav {
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+
+      .game-header-inner {
+        padding: 1rem 1.1rem;
+      }
+
+      .game-intro p {
+        font-size: 1rem;
+      }
+    }
+  </style>
+</head>
+<body class="game-page">
+  <header class="game-site-header">
+    <div class="game-header-inner">
+      <a class="game-brand" href="/">Avital Oliver</a>
+      <nav class="game-nav" aria-label="Site">
+        <a href="/">Home</a>
+        <a href="/about/">About</a>
+        <a href="/articles/">Articles</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="game-main">
+    <section class="game-intro">
+      <h1>Jump Runner</h1>
+      <p>Leap over oncoming blocks, keep your footing on the scrolling ground, and chase a new best score in this browser-friendly endless runner.</p>
+    </section>
+
+    <section class="game-stage">
+      <canvas id="gameCanvas" width="900" height="400" role="img" aria-label="Jump Runner game canvas"></canvas>
+      <div class="game-hints">
+        <p><strong>How to play:</strong> Press the <kbd>Space</kbd> bar, <kbd>Up Arrow</kbd>, or simply tap/click anywhere on the game to jump. Avoid the blocks, and jump again after a crash to restart instantly.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="game-footer">
+    <p>Built for the Avital Oliver site &mdash; <a href="/">return to the homepage</a>.</p>
+  </footer>
+
+  <script>
+    (function () {
+      const canvas = document.getElementById('gameCanvas');
+      const ctx = canvas.getContext('2d');
+      const horizon = canvas.height - 90;
+      const gravity = 2300;
+      const jumpVelocity = -930;
+      const baseSpeed = 330;
+      const maxSpeed = 760;
+
+      const player = {
+        x: canvas.width * 0.2,
+        y: horizon - 70,
+        width: 50,
+        height: 70,
+        vy: 0,
+        grounded: true
+      };
+
+      let obstacles = [];
+      let clouds = [];
+      let groundOffset = 0;
+      let spawnTimer = 1.2;
+      let cloudTimer = 0;
+      let distance = 0;
+      let score = 0;
+      let bestScore = 0;
+      let gameOver = false;
+      let lastTime;
+
+      try {
+        const stored = localStorage.getItem('jump-runner-best-score');
+        if (stored) {
+          const parsed = parseInt(stored, 10);
+          if (!Number.isNaN(parsed)) {
+            bestScore = parsed;
+          }
+        }
+      } catch (err) {
+        bestScore = 0;
+      }
+
+      function randomRange(min, max) {
+        return Math.random() * (max - min) + min;
+      }
+
+      function drawRoundedRect(x, y, width, height, radius) {
+        const r = Math.min(radius, width / 2, height / 2);
+        ctx.beginPath();
+        ctx.moveTo(x + r, y);
+        ctx.lineTo(x + width - r, y);
+        ctx.quadraticCurveTo(x + width, y, x + width, y + r);
+        ctx.lineTo(x + width, y + height - r);
+        ctx.quadraticCurveTo(x + width, y + height, x + width - r, y + height);
+        ctx.lineTo(x + r, y + height);
+        ctx.quadraticCurveTo(x, y + height, x, y + height - r);
+        ctx.lineTo(x, y + r);
+        ctx.quadraticCurveTo(x, y, x + r, y);
+        ctx.closePath();
+        ctx.fill();
+      }
+
+      function spawnObstacle() {
+        const width = randomRange(36, 72);
+        const height = randomRange(44, 120);
+        obstacles.push({
+          x: canvas.width + width,
+          y: horizon - height,
+          width,
+          height,
+          color: '#5bc0ff'
+        });
+      }
+
+      function spawnCloud() {
+        const size = randomRange(60, 140);
+        clouds.push({
+          x: canvas.width + size,
+          y: randomRange(40, horizon - 160),
+          width: size,
+          height: size * 0.6,
+          speed: randomRange(24, 46)
+        });
+      }
+
+      function resetGame() {
+        obstacles = [];
+        clouds = [];
+        groundOffset = 0;
+        spawnTimer = 0.85;
+        cloudTimer = randomRange(1.4, 2.6);
+        distance = 0;
+        score = 0;
+        player.y = horizon - player.height;
+        player.vy = 0;
+        player.grounded = true;
+        gameOver = false;
+        lastTime = undefined;
+      }
+
+      function handleJump() {
+        if (gameOver) {
+          resetGame();
+          return;
+        }
+        if (player.grounded) {
+          player.vy = jumpVelocity;
+          player.grounded = false;
+        }
+      }
+
+      function updateBestScore() {
+        if (score > bestScore) {
+          bestScore = score;
+          try {
+            localStorage.setItem('jump-runner-best-score', String(bestScore));
+          } catch (err) {
+            /* ignored */
+          }
+        }
+      }
+
+      function update(delta) {
+        if (gameOver) {
+          return;
+        }
+
+        const speed = Math.min(baseSpeed + distance / 7, maxSpeed);
+        groundOffset = (groundOffset + speed * delta) % 60;
+
+        player.vy += gravity * delta;
+        player.y += player.vy * delta;
+
+        if (player.y + player.height >= horizon) {
+          player.y = horizon - player.height;
+          player.vy = 0;
+          player.grounded = true;
+        }
+
+        spawnTimer -= delta;
+        if (spawnTimer <= 0) {
+          spawnObstacle();
+          const difficulty = Math.min(distance / 1600, 0.55);
+          spawnTimer = Math.max(0.6, randomRange(0.95 - difficulty, 1.55 - difficulty * 0.5));
+        }
+
+        cloudTimer -= delta;
+        if (cloudTimer <= 0) {
+          spawnCloud();
+          cloudTimer = randomRange(2.4, 5.6);
+        }
+
+        for (let i = clouds.length - 1; i >= 0; i--) {
+          const cloud = clouds[i];
+          cloud.x -= (speed * 0.35 + cloud.speed) * delta;
+          if (cloud.x + cloud.width < -40) {
+            clouds.splice(i, 1);
+          }
+        }
+
+        for (let i = obstacles.length - 1; i >= 0; i--) {
+          const obstacle = obstacles[i];
+          obstacle.x -= speed * delta;
+          if (obstacle.x + obstacle.width < -10) {
+            obstacles.splice(i, 1);
+            continue;
+          }
+
+          if (
+            player.x < obstacle.x + obstacle.width &&
+            player.x + player.width > obstacle.x &&
+            player.y < obstacle.y + obstacle.height &&
+            player.y + player.height > obstacle.y
+          ) {
+            gameOver = true;
+            updateBestScore();
+          }
+        }
+
+        distance += speed * delta;
+        score = Math.floor(distance / 12);
+      }
+
+      function drawBackground() {
+        const sky = ctx.createLinearGradient(0, 0, 0, horizon);
+        sky.addColorStop(0, '#071a33');
+        sky.addColorStop(1, '#143052');
+        ctx.fillStyle = sky;
+        ctx.fillRect(0, 0, canvas.width, horizon);
+
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.16)';
+        clouds.forEach(cloud => {
+          ctx.beginPath();
+          const x = cloud.x;
+          const y = cloud.y;
+          const w = cloud.width;
+          const h = cloud.height;
+          ctx.ellipse(x + w * 0.25, y + h * 0.6, w * 0.28, h * 0.38, 0, 0, Math.PI * 2);
+          ctx.ellipse(x + w * 0.5, y + h * 0.5, w * 0.34, h * 0.4, 0, 0, Math.PI * 2);
+          ctx.ellipse(x + w * 0.72, y + h * 0.62, w * 0.26, h * 0.36, 0, 0, Math.PI * 2);
+          ctx.fill();
+        });
+
+        const ground = ctx.createLinearGradient(0, horizon, 0, canvas.height);
+        ground.addColorStop(0, '#0d2034');
+        ground.addColorStop(1, '#071222');
+        ctx.fillStyle = ground;
+        ctx.fillRect(0, horizon, canvas.width, canvas.height - horizon);
+
+        ctx.fillStyle = 'rgba(13, 46, 76, 0.9)';
+        for (let x = -groundOffset; x < canvas.width + 120; x += 120) {
+          ctx.beginPath();
+          ctx.moveTo(x, horizon);
+          ctx.lineTo(x + 60, horizon - 26);
+          ctx.lineTo(x + 120, horizon);
+          ctx.closePath();
+          ctx.fill();
+        }
+
+        ctx.fillStyle = 'rgba(3, 12, 24, 0.55)';
+        for (let x = -groundOffset * 1.2; x < canvas.width + 60; x += 60) {
+          ctx.fillRect(x, horizon, 28, 8);
+        }
+      }
+
+      function drawPlayer() {
+        const shadowWidth = player.width * 0.7;
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.35)';
+        ctx.beginPath();
+        ctx.ellipse(player.x + player.width / 2, horizon + 14, shadowWidth / 2, 9, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = '#ffd166';
+        drawRoundedRect(player.x, player.y, player.width, player.height, 14);
+        ctx.fillStyle = '#ffe29a';
+        drawRoundedRect(player.x + 10, player.y + 10, player.width - 20, 14, 7);
+        ctx.fillStyle = '#374a67';
+        drawRoundedRect(player.x + player.width - 18, player.y + 22, 12, 18, 6);
+      }
+
+      function drawObstacles() {
+        obstacles.forEach(obstacle => {
+          ctx.fillStyle = obstacle.color;
+          drawRoundedRect(obstacle.x, obstacle.y, obstacle.width, obstacle.height, 8);
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.35)';
+          ctx.fillRect(obstacle.x + 6, obstacle.y + 6, obstacle.width - 12, 10);
+          ctx.fillStyle = 'rgba(9, 25, 44, 0.25)';
+          ctx.fillRect(obstacle.x, obstacle.y + obstacle.height - 8, obstacle.width, 8);
+        });
+      }
+
+      function drawHUD() {
+        ctx.fillStyle = 'rgba(232, 241, 255, 0.95)';
+        ctx.font = '24px "Source Sans Pro", sans-serif';
+        ctx.textAlign = 'left';
+        ctx.fillText(`Score: ${score}`, 24, 40);
+        ctx.fillText(`Best: ${bestScore}`, 24, 72);
+
+        if (!gameOver && distance < 260) {
+          ctx.textAlign = 'center';
+          ctx.font = '20px "Source Sans Pro", sans-serif';
+          ctx.fillStyle = 'rgba(232, 241, 255, 0.75)';
+          ctx.fillText('Tap, click, or press Space / ↑ to jump', canvas.width / 2, horizon - 140);
+        }
+      }
+
+      function drawGameOver() {
+        ctx.fillStyle = 'rgba(6, 13, 28, 0.7)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.textAlign = 'center';
+        ctx.fillStyle = '#f8fbff';
+        ctx.font = '44px "Source Sans Pro", sans-serif';
+        ctx.fillText('Crash!', canvas.width / 2, canvas.height / 2 - 30);
+        ctx.font = '22px "Source Sans Pro", sans-serif';
+        ctx.fillText(`Score: ${score}`, canvas.width / 2, canvas.height / 2 + 8);
+        ctx.fillText('Tap or press Space to try again', canvas.width / 2, canvas.height / 2 + 44);
+      }
+
+      function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        drawBackground();
+        drawObstacles();
+        drawPlayer();
+        drawHUD();
+        if (gameOver) {
+          drawGameOver();
+        }
+      }
+
+      function gameLoop(timestamp) {
+        if (lastTime === undefined) {
+          lastTime = timestamp;
+        }
+        const delta = Math.min((timestamp - lastTime) / 1000, 0.05);
+        lastTime = timestamp;
+
+        update(delta);
+        draw();
+        requestAnimationFrame(gameLoop);
+      }
+
+      document.addEventListener('keydown', event => {
+        if (event.code === 'Space' || event.code === 'ArrowUp' || event.code === 'KeyW') {
+          event.preventDefault();
+          handleJump();
+        }
+      });
+
+      document.addEventListener('keyup', event => {
+        if ((event.code === 'Space' || event.code === 'ArrowUp' || event.code === 'KeyW') && player.vy < -520) {
+          player.vy = -520;
+        }
+      });
+
+      canvas.addEventListener('mousedown', handleJump);
+      canvas.addEventListener('touchstart', event => {
+        event.preventDefault();
+        handleJump();
+      }, { passive: false });
+
+      resetGame();
+      requestAnimationFrame(gameLoop);
+    })();
+  </script>
+</body>
+</html>

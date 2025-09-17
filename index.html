@@ -60,6 +60,58 @@
 <!-- For all browsers -->
 <link rel="stylesheet" href="/assets/css/i.css">
 
+<style>
+  .post-list .game-highlight {
+    list-style: none;
+    margin: 0 0 2.5em;
+    padding: 0;
+  }
+
+  .game-callout {
+    background: linear-gradient(135deg, #143961 0%, #0b1e34 45%, #071220 100%);
+    border-radius: 16px;
+    padding: 1.8em 2em;
+    box-shadow: 0 28px 48px -28px rgba(4, 12, 23, 0.9);
+    color: #f2f7ff;
+    border: 1px solid rgba(120, 180, 255, 0.28);
+  }
+
+  .game-callout h1 {
+    margin-bottom: 0.4em;
+    font-size: 2.1em;
+    font-family: 'Crimson Text', Georgia, serif;
+  }
+
+  .game-callout .post-link {
+    color: #ffffff;
+  }
+
+  .game-callout p {
+    margin-bottom: 0.9em;
+    font-size: 1.05em;
+    color: rgba(240, 247, 255, 0.85);
+  }
+
+  .game-callout .read-more-link {
+    color: #ffeaa7;
+    font-weight: 600;
+  }
+
+  .game-callout .read-more-link:hover {
+    color: #fff3c4;
+  }
+
+  @media (max-width: 620px) {
+    .game-callout {
+      padding: 1.4em;
+    }
+
+    .game-callout h1 {
+      font-size: 1.8em;
+    }
+  }
+</style>
+
 <!-- Fresh Squeezed jQuery -->
 
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
@@ -103,6 +155,15 @@
           <article class="archive-wrap">
               <ol class="post-list">
                  <lh><h2><span class="bb">Recent Posts</span></h2></lh>
+
+                  <li class="game-highlight">
+
+                    <div class="game-callout">
+                        <h1><a class="post-link" href="/jump-runner.html">Jump Runner Game</a></h1>
+                        <p class="">Dash forward automatically while you vault over glowing blocks. The pace keeps rising, so time your jumps carefully.</p>
+                        <p><a class="read-more-link" href="/jump-runner.html">Play the game ⟶</a></p>
+                    </div>
+                  </li>
                   
                   <li>
                     
