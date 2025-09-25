@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sideways Dash &ndash; Jumping Block Runner</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --sky-top: #67b0f4;
+      --sky-bottom: #b9e7ff;
+      --ground: #4c3b2a;
+      --ground-top: #6fc35d;
+      --player: #ffba49;
+      --player-detail: #ff8b3d;
+      --obstacle: #3d84a8;
+      --obstacle-alt: #2f6690;
+      --text: #132537;
+      font-family: "Source Sans Pro", "Helvetica Neue", Arial, sans-serif;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --sky-top: #172a45;
+        --sky-bottom: #263d5f;
+        --ground: #1f1b2c;
+        --ground-top: #2f8f4e;
+        --player: #f6d365;
+        --player-detail: #fca77d;
+        --obstacle: #5aa9e6;
+        --obstacle-alt: #3f8ac1;
+        --text: #f8f9fb;
+      }
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: radial-gradient(circle at top, rgba(255, 255, 255, 0.45), transparent 65%),
+                  linear-gradient(180deg, var(--sky-top), var(--sky-bottom));
+      color: var(--text);
+    }
+
+    main {
+      width: min(960px, 95vw);
+      padding: clamp(1rem, 3vw, 2.25rem);
+      background: rgba(255, 255, 255, 0.82);
+      border-radius: 24px;
+      box-shadow: 0 20px 45px rgba(30, 60, 110, 0.25);
+      backdrop-filter: blur(6px);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      main {
+        background: rgba(12, 17, 32, 0.75);
+        box-shadow: 0 20px 45px rgba(5, 9, 20, 0.55);
+      }
+    }
+
+    h1 {
+      margin-top: 0;
+      font-size: clamp(2rem, 4vw, 3rem);
+      letter-spacing: 0.02em;
+      text-align: center;
+    }
+
+    p.instructions {
+      text-align: center;
+      margin-bottom: 1.5rem;
+      font-size: 1.1rem;
+    }
+
+    #game-shell {
+      position: relative;
+      margin-inline: auto;
+      width: min(860px, 100%);
+    }
+
+    canvas {
+      width: 100%;
+      height: auto;
+      border-radius: 18px;
+      background: linear-gradient(180deg, var(--sky-top), var(--sky-bottom));
+      box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.35),
+                  0 18px 35px rgba(28, 48, 78, 0.35);
+      touch-action: manipulation;
+    }
+
+    #hud {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      pointer-events: none;
+      padding: 1rem clamp(1.25rem, 3vw, 1.75rem);
+      font-weight: 600;
+      letter-spacing: 0.02em;
+    }
+
+    #scores {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    #status {
+      align-self: center;
+      font-size: clamp(0.95rem, 2.4vw, 1.2rem);
+      text-align: center;
+      background: rgba(255, 255, 255, 0.72);
+      color: var(--text);
+      padding: 0.6rem 1.1rem;
+      border-radius: 999px;
+      pointer-events: auto;
+      transition: transform 0.2s ease, opacity 0.2s ease;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      #status {
+        background: rgba(15, 22, 38, 0.72);
+      }
+    }
+
+    button#restart {
+      display: block;
+      margin: 1.8rem auto 0;
+      background: linear-gradient(135deg, #ff7a59, #ffce5c);
+      border: none;
+      border-radius: 999px;
+      color: #1f1f1f;
+      font-size: 1.05rem;
+      font-weight: 600;
+      padding: 0.75rem 2.8rem;
+      cursor: pointer;
+      box-shadow: 0 12px 18px rgba(255, 140, 80, 0.32);
+      transition: transform 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    button#restart:hover,
+    button#restart:focus-visible {
+      transform: translateY(-2px);
+      box-shadow: 0 16px 26px rgba(255, 140, 80, 0.42);
+    }
+
+    button#restart:active {
+      transform: translateY(1px);
+    }
+
+    button#restart[hidden] {
+      display: none;
+    }
+
+    footer {
+      margin-top: 2.5rem;
+      text-align: center;
+      font-size: 0.95rem;
+      opacity: 0.7;
+    }
+
+    @media (max-width: 600px) {
+      body {
+        align-items: flex-start;
+        padding: 1.5rem 0.75rem;
+      }
+
+      main {
+        border-radius: 18px;
+        padding: 1.5rem;
+      }
+
+      #status {
+        font-size: 0.95rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Sideways Dash</h1>
+    <p class="instructions">Leap over every block while the world rushes past. Press <strong>Space</strong>,
+      <strong>W</strong>, or the <strong>Up Arrow</strong> to jump. On touch devices, tap the game.</p>
+
+    <div id="game-shell">
+      <canvas id="game-canvas" width="840" height="360" role="img" aria-label="A side-scrolling jumping game"></canvas>
+      <div id="hud" aria-live="polite">
+        <div id="scores">
+          <div id="score">Score: 0</div>
+          <div id="best">Best: 0</div>
+        </div>
+        <div id="status">Tap or press jump to begin!</div>
+      </div>
+    </div>
+
+    <button id="restart" hidden>Play again</button>
+
+    <footer>
+      Built with vanilla HTML5 canvas &mdash; no downloads required.
+    </footer>
+  </main>
+
+  <script>
+    (function () {
+      const canvas = document.getElementById('game-canvas');
+      const ctx = canvas.getContext('2d');
+      const scoreEl = document.getElementById('score');
+      const bestEl = document.getElementById('best');
+      const statusEl = document.getElementById('status');
+      const restartButton = document.getElementById('restart');
+
+      const state = {
+        running: false,
+        gameOver: false,
+        started: false,
+        groundHeight: 82,
+        baseSpeed: 260,
+        maxSpeed: 620,
+        speed: 260,
+        acceleration: 16,
+        spawnTimer: 0,
+        spawnRange: [0.75, 1.45],
+        gravity: 2200,
+        jumpVelocity: -920,
+        backgroundOffset: 0,
+        skyOffset: 0,
+        score: 0,
+        highScore: 0,
+        lastTime: null,
+        obstacles: []
+      };
+
+      const player = {
+        width: 38,
+        height: 52,
+        x: 140,
+        y: 0,
+        velocityY: 0,
+        onGround: true
+      };
+
+      const groundY = () => canvas.height - state.groundHeight - player.height;
+
+      function loadHighScore() {
+        try {
+          const stored = localStorage.getItem('sideways-dash-best');
+          if (stored) {
+            state.highScore = parseInt(stored, 10) || 0;
+          }
+        } catch (err) {
+          state.highScore = 0;
+        }
+        updateScores();
+      }
+
+      function saveHighScore() {
+        try {
+          localStorage.setItem('sideways-dash-best', String(state.highScore));
+        } catch (err) {
+          // Ignore storage failures (private mode, etc.)
+        }
+      }
+
+      function updateScores() {
+        scoreEl.textContent = `Score: ${Math.floor(state.score)}`;
+        bestEl.textContent = `Best: ${Math.floor(state.highScore)}`;
+      }
+
+      function setStatus(message) {
+        statusEl.textContent = message;
+        statusEl.style.opacity = '1';
+        statusEl.style.transform = 'translateY(0)';
+      }
+
+      function fadeStatus() {
+        statusEl.style.opacity = '0';
+        statusEl.style.transform = 'translateY(-12px)';
+      }
+
+      function resetPlayer() {
+        player.y = groundY();
+        player.velocityY = 0;
+        player.onGround = true;
+      }
+
+      function startGame() {
+        state.running = true;
+        state.gameOver = false;
+        state.started = true;
+        state.speed = state.baseSpeed;
+        state.spawnTimer = 0.2;
+        state.score = 0;
+        state.backgroundOffset = 0;
+        state.skyOffset = 0;
+        state.obstacles = [];
+        state.lastTime = null;
+        resetPlayer();
+        updateScores();
+        setStatus('Leap over the blocks!');
+        restartButton.hidden = true;
+        window.setTimeout(fadeStatus, 1100);
+      }
+
+      function endGame() {
+        if (state.gameOver) {
+          return;
+        }
+        state.running = false;
+        state.gameOver = true;
+        state.started = false;
+        setStatus('Ouch! Press R, Enter or tap Play again to restart.');
+        restartButton.hidden = false;
+        if (state.score > state.highScore) {
+          state.highScore = Math.floor(state.score);
+          saveHighScore();
+          updateScores();
+        }
+      }
+
+      function spawnObstacle() {
+        const width = 36 + Math.random() * 38;
+        const height = 28 + Math.random() * 90;
+        const obstacle = {
+          width,
+          height,
+          x: canvas.width + width,
+          y: canvas.height - state.groundHeight - height,
+          passed: false,
+          hue: Math.random() * 40
+        };
+        state.obstacles.push(obstacle);
+        const difficultyScale = Math.min(1.55, 1 + state.score / 600);
+        const minDelay = state.spawnRange[0] / difficultyScale;
+        const maxDelay = state.spawnRange[1] / difficultyScale;
+        state.spawnTimer = minDelay + Math.random() * (maxDelay - minDelay);
+      }
+
+      function jump() {
+        if (!state.running) {
+          if (!state.started || state.gameOver) {
+            startGame();
+          } else {
+            state.running = true;
+            setStatus('Leap over the blocks!');
+            window.setTimeout(fadeStatus, 800);
+          }
+        }
+        if (player.onGround) {
+          player.velocityY = state.jumpVelocity;
+          player.onGround = false;
+        }
+      }
+
+      function update(delta) {
+        state.backgroundOffset = (state.backgroundOffset + state.speed * delta) % canvas.width;
+        state.skyOffset = (state.skyOffset + state.speed * 0.35 * delta) % canvas.width;
+
+        state.speed = Math.min(state.speed + state.acceleration * delta, state.maxSpeed);
+        state.spawnTimer -= delta;
+        if (state.spawnTimer <= 0) {
+          spawnObstacle();
+        }
+
+        player.velocityY += state.gravity * delta;
+        player.y += player.velocityY * delta;
+
+        const floorY = groundY();
+        if (player.y >= floorY) {
+          player.y = floorY;
+          player.velocityY = 0;
+          player.onGround = true;
+        }
+
+        state.obstacles.forEach(obstacle => {
+          obstacle.x -= state.speed * delta;
+          if (!obstacle.passed && obstacle.x + obstacle.width < player.x) {
+            obstacle.passed = true;
+            state.score += 12;
+          }
+        });
+
+        state.obstacles = state.obstacles.filter(obstacle => obstacle.x + obstacle.width > -10);
+
+        state.score += delta * state.speed * 0.09;
+        updateScores();
+
+        for (const obstacle of state.obstacles) {
+          if (checkCollision(player, obstacle)) {
+            endGame();
+            break;
+          }
+        }
+      }
+
+      function checkCollision(a, b) {
+        return (
+          a.x < b.x + b.width - 6 &&
+          a.x + a.width - 6 > b.x &&
+          a.y < b.y + b.height &&
+          a.y + a.height > b.y + 4
+        );
+      }
+
+      function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        drawSky();
+        drawGround();
+        drawObstacles();
+        drawPlayer();
+        drawShadow();
+        if (state.gameOver) {
+          drawGameOver();
+        }
+      }
+
+      function drawSky() {
+        const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+        const dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        gradient.addColorStop(0, dark ? '#132342' : '#77c0ff');
+        gradient.addColorStop(1, dark ? '#1f3454' : '#d3f0ff');
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        const cloudOffset = state.skyOffset % 200;
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.25)';
+        for (let x = -cloudOffset; x < canvas.width + 200; x += 200) {
+          const y = 40 + (x % 400) * 0.08;
+          ctx.beginPath();
+          ctx.ellipse(x, y, 46, 18, 0, 0, Math.PI * 2);
+          ctx.ellipse(x + 40, y + 8, 34, 14, 0, 0, Math.PI * 2);
+          ctx.ellipse(x + 80, y + 4, 26, 12, 0, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+
+      function drawGround() {
+        const top = canvas.height - state.groundHeight;
+        ctx.fillStyle = window.matchMedia('(prefers-color-scheme: dark)').matches ? '#27442f' : '#87d96a';
+        ctx.fillRect(0, top - 6, canvas.width, 16);
+
+        const offset = state.backgroundOffset % 60;
+        for (let x = -offset; x < canvas.width; x += 60) {
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.35)';
+          ctx.fillRect(x, top - 6, 28, 2.5);
+        }
+
+        ctx.fillStyle = window.matchMedia('(prefers-color-scheme: dark)').matches ? '#1b1426' : '#5c4a34';
+        ctx.fillRect(0, top + 10, canvas.width, state.groundHeight - 10);
+
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.12)';
+        ctx.fillRect(0, top + 10, canvas.width, 3);
+      }
+
+      function drawObstacles() {
+        state.obstacles.forEach((obstacle, index) => {
+          const hue = 198 + obstacle.hue;
+          const color = `hsl(${hue}, 62%, 46%)`;
+          const darker = `hsl(${hue}, 52%, 36%)`;
+          ctx.fillStyle = color;
+          ctx.fillRect(Math.floor(obstacle.x), obstacle.y, obstacle.width, obstacle.height);
+          ctx.fillStyle = darker;
+          ctx.fillRect(Math.floor(obstacle.x), obstacle.y + obstacle.height - 6, obstacle.width, 6);
+        });
+      }
+
+      function drawPlayer() {
+        const x = Math.floor(player.x);
+        const y = Math.floor(player.y);
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.18)';
+        const shadowWidth = player.width * (player.onGround ? 1 : 0.7);
+        ctx.beginPath();
+        ctx.ellipse(x + player.width / 2, canvas.height - state.groundHeight + 16, shadowWidth, 10, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = '#ffb347';
+        ctx.fillRect(x, y, player.width, player.height);
+        ctx.fillStyle = '#ff9248';
+        ctx.fillRect(x + 6, y + 12, player.width - 12, player.height - 20);
+        ctx.fillStyle = '#ffe29a';
+        ctx.fillRect(x + 8, y + 6, player.width - 16, 12);
+      }
+
+      function drawShadow() {
+        // Additional faint horizon lines for motion
+        const offset = state.backgroundOffset % 120;
+        ctx.strokeStyle = 'rgba(0, 0, 0, 0.08)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        for (let x = -offset; x < canvas.width; x += 120) {
+          ctx.moveTo(x, canvas.height - state.groundHeight + 24);
+          ctx.lineTo(x + 60, canvas.height - state.groundHeight + 34);
+        }
+        ctx.stroke();
+      }
+
+      function drawGameOver() {
+        ctx.fillStyle = 'rgba(12, 18, 28, 0.48)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 42px "Source Sans Pro", sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('Game Over', canvas.width / 2, canvas.height / 2 - 10);
+        ctx.font = '600 20px "Source Sans Pro", sans-serif';
+        ctx.fillText('Press R or tap Play again to try once more!', canvas.width / 2, canvas.height / 2 + 26);
+      }
+
+      function gameLoop(timestamp) {
+        if (!state.lastTime) {
+          state.lastTime = timestamp;
+        }
+        const delta = (timestamp - state.lastTime) / 1000;
+        state.lastTime = timestamp;
+
+        if (state.running) {
+          update(Math.min(delta, 0.045));
+        }
+
+        draw();
+        requestAnimationFrame(gameLoop);
+      }
+
+      function handleKeydown(event) {
+        if (['Space', 'ArrowUp', 'KeyW'].includes(event.code)) {
+          event.preventDefault();
+          jump();
+        } else if (event.code === 'KeyR' || event.code === 'Enter') {
+          if (state.gameOver) {
+            event.preventDefault();
+            startGame();
+          }
+        }
+      }
+
+      function handlePointer(event) {
+        event.preventDefault();
+        if (state.gameOver) {
+          startGame();
+        } else {
+          jump();
+        }
+      }
+
+      restartButton.addEventListener('click', startGame);
+      window.addEventListener('keydown', handleKeydown);
+      canvas.addEventListener('pointerdown', handlePointer);
+
+      window.addEventListener('blur', () => {
+        if (state.running) {
+          setStatus('Paused — click or press jump to continue.');
+          state.running = false;
+        }
+      });
+
+      window.addEventListener('focus', () => {
+        if (!state.gameOver && !state.running) {
+          setStatus('Tap or press jump to continue.');
+          window.setTimeout(fadeStatus, 1000);
+        }
+      });
+
+      function handleVisibility() {
+        if (document.hidden && state.running) {
+          state.running = false;
+          setStatus('Paused — click or press jump to continue.');
+        }
+      }
+
+      document.addEventListener('visibilitychange', handleVisibility);
+
+      loadHighScore();
+      resetPlayer();
+      draw();
+      setStatus('Tap or press jump to begin!');
+      requestAnimationFrame(gameLoop);
+    })();
+  </script>
+</body>
+</html>
